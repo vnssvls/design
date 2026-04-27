@@ -1,0 +1,15 @@
+export const tokens = {
+  bgCanvas: '#0A0A0F',
+  bgSurface: '#181818',
+  textPrimary: 'rgba(255,255,255,0.88)',
+  textSecondary: 'rgba(255,255,255,0.60)',
+  success: '#47B881',
+  warning: '#FF9350',
+  error: '#BA4C4E',
+  primary: '#BB86FC',
+  menuItem: '#7EC6E8',
+  prebatch: '#97EEB1',
+  posButton: '#E5DA73',
+  border: 'rgba(255,255,255,0.07)',
+  fontFamily: "'Inter', sans-serif",
+};
