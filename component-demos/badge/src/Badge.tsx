@@ -14,6 +14,7 @@ export interface BadgeProps {
   size?: BadgeSize;
   color?: BadgeColor;
   showDot?: boolean;
+  showIcon?: boolean;
   showLabel?: boolean;
   showClose?: boolean;
   label?: string;
@@ -82,6 +83,7 @@ export function Badge({
   size = 'md',
   color = 'success',
   showDot = false,
+  showIcon = false,
   showLabel = true,
   showClose = false,
   label = 'Label',
@@ -127,6 +129,11 @@ export function Badge({
 
   return (
     <div style={containerStyle}>
+      {showIcon && (
+        <svg width={s.dotSize + 2} height={s.dotSize + 2} viewBox="0 0 8 8" fill="none" style={{ flexShrink: 0 }}>
+          <rect x="1" y="1" width="6" height="6" rx="1" fill={textColor} opacity={0.8}/>
+        </svg>
+      )}
       {showDot && (
         <span style={{
           width: s.dotSize,

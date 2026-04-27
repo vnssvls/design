@@ -105,6 +105,7 @@ export default function App() {
   const [size, setSize] = useState<BadgeSize>('md');
   const [color, setColor] = useState<BadgeColor>('success');
   const [showDot, setShowDot] = useState(false);
+  const [showIcon, setShowIcon] = useState(false);
   const [showLabel, setShowLabel] = useState(true);
   const [showClose, setShowClose] = useState(false);
 
@@ -137,6 +138,7 @@ export default function App() {
 
         <span style={controlLabel}>Slots</span>
         <Toggle label="show-dot" value={showDot} onChange={setShowDot} />
+        <Toggle label="show-icon" value={showIcon} onChange={setShowIcon} />
         <Toggle label="show-label" value={showLabel} onChange={setShowLabel} />
         <Toggle label="show-close" value={showClose} onChange={setShowClose} />
 
@@ -172,6 +174,7 @@ export default function App() {
             color={color}
             showDot={showDot}
             showLabel={showLabel}
+            showIcon={showIcon}
             showClose={showClose}
           />
           <span style={{ fontFamily: tokens.fontFamily, fontSize: '11px', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.3px' }}>
@@ -193,6 +196,7 @@ export default function App() {
                 size={size}
                 color={c}
                 showDot={showDot}
+                showIcon={showIcon}
                 showLabel={showLabel}
                 showClose={showClose}
                 label={c}
