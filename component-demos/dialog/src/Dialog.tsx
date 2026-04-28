@@ -28,6 +28,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
+    height: '250px',
   },
   header: {
     padding: '20px 20px 16px',
@@ -71,6 +72,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     gap: '8px',
+    flex: 1,
   },
   label: {
     fontSize: tokens.fontSizeXs,
@@ -196,28 +198,16 @@ export function Dialog({ type, theme, title = 'Save Report As' }: DialogProps) {
 
   return (
     <div style={shellStyle}>
-      {/* Header */}
-      {type === 'alert' ? (
-        <div style={styles.header}>
-          <div style={styles.headerRow}>
-            <h2 style={styles.title}>{title}</h2>
-            <button style={styles.closeBtn}>✕</button>
-          </div>
-          <p style={styles.subtitle}>Would you like to save your changes or discard them?</p>
-        </div>
-      ) : (
-        <div style={{ ...styles.header, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h2 style={styles.title}>{title}</h2>
-          <button style={styles.closeBtn}>✕</button>
-        </div>
-      )}
+      {/* Header — identical layout for all types */}
+      <div style={{ ...styles.header, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h2 style={styles.title}>{title}</h2>
+        <button style={styles.closeBtn}>✕</button>
+      </div>
 
       {/* Body */}
       {type === 'input' && (
         <div style={styles.body}>
-          <div style={{ paddingTop: '12px' }}>
-            <p style={styles.label}>Report name</p>
-          </div>
+          <p style={styles.label}>Report name</p>
           <input
             style={{
               ...styles.input,
@@ -236,9 +226,15 @@ export function Dialog({ type, theme, title = 'Save Report As' }: DialogProps) {
         </div>
       )}
 
+      {type === 'alert' && (
+        <div style={styles.body}>
+          <p style={styles.subtitle}>Would you like to save your changes or discard them?</p>
+        </div>
+      )}
+
       {type === 'confirmation' && (
         <div style={styles.body}>
-          <p style={{ ...styles.subtitle, paddingTop: '12px' }}>
+          <p style={styles.subtitle}>
             This action cannot be undone. Do you want to continue?
           </p>
           <div style={styles.checkboxRow}>
