@@ -103,16 +103,7 @@ function ButtonItem({
 
   // For pill shape we give inner buttons a slightly tighter radius
   // to fit snugly inside the container; first/last buttons get full inner curve.
-  const borderRadius =
-    shape === 'pill'
-      ? innerRadius
-      : isFirst && isLast
-        ? innerRadius
-        : isFirst
-          ? `${innerRadius}px 2px 2px ${innerRadius}px`
-          : isLast
-            ? `2px ${innerRadius}px ${innerRadius}px 2px`
-            : '2px';
+  const borderRadius = innerRadius;
 
   return (
     <button
