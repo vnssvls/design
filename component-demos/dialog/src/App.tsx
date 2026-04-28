@@ -67,6 +67,7 @@ function ControlGroup({
 export default function App() {
   const [type, setType] = useState<DialogType>('input');
   const [theme, setTheme] = useState<DialogTheme>('Grey');
+  const [showFieldLabel, setShowFieldLabel] = useState(false);
 
   return (
     <div
@@ -111,6 +112,18 @@ export default function App() {
           onChange={v => setTheme(v as DialogTheme)}
         />
 
+        {type === 'input' && (
+          <div style={{ marginBottom: '24px' }}>
+            <span style={controlLabel}>Field label</span>
+            <button
+              style={{ ...controlOption, ...(showFieldLabel ? controlOptionActive : {}) }}
+              onClick={() => setShowFieldLabel(v => !v)}
+            >
+              {showFieldLabel ? 'visible' : 'hidden'}
+            </button>
+          </div>
+        )}
+
         <div style={{ marginTop: 'auto', paddingTop: '24px', borderTop: `1px solid ${tokens.border}` }}>
           <span style={{ ...controlLabel, marginBottom: '4px' }}>Figma</span>
           <a
@@ -145,7 +158,7 @@ export default function App() {
           }}
         />
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <Dialog type={type} theme={theme} />
+          <Dialog type={type} theme={theme} showFieldLabel={showFieldLabel} />
         </div>
 
         {/* Variant label */}

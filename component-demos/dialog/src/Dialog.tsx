@@ -8,6 +8,7 @@ interface DialogProps {
   type: DialogType;
   theme: DialogTheme;
   title?: string;
+  showFieldLabel?: boolean;
 }
 
 const styles: Record<string, React.CSSProperties> = {
@@ -73,6 +74,7 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: 'column',
     gap: '8px',
     flex: 1,
+    justifyContent: 'center',
   },
   label: {
     fontSize: tokens.fontSizeXs,
@@ -170,7 +172,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
 };
 
-export function Dialog({ type, theme, title = 'Save Report As' }: DialogProps) {
+export function Dialog({ type, theme, title = 'Save Report As', showFieldLabel = false }: DialogProps) {
   const [inputValue, setInputValue] = useState('');
   const [inputState, setInputState] = useState<'default' | 'duplicate' | 'error'>('default');
   const [checked, setChecked] = useState(false);
@@ -207,7 +209,7 @@ export function Dialog({ type, theme, title = 'Save Report As' }: DialogProps) {
       {/* Body */}
       {type === 'input' && (
         <div style={styles.body}>
-          <p style={styles.label}>Report name</p>
+          {showFieldLabel && <p style={styles.label}>Report name</p>}
           <input
             style={{
               ...styles.input,
