@@ -212,8 +212,6 @@ export function Dialog({ type, theme, title = 'Save Report As' }: DialogProps) {
         </div>
       )}
 
-      <div style={styles.divider} />
-
       {/* Body */}
       {type === 'input' && (
         <div style={styles.body}>
@@ -258,8 +256,6 @@ export function Dialog({ type, theme, title = 'Save Report As' }: DialogProps) {
         </div>
       )}
 
-      <div style={styles.divider} />
-
       {/* Footer */}
       <div style={styles.footer}>
         {type === 'input' && (
@@ -280,7 +276,7 @@ export function Dialog({ type, theme, title = 'Save Report As' }: DialogProps) {
             <button style={styles.btnGhost}>Cancel</button>
             <button
               style={{
-                ...styles.btnPrimary,
+                ...styles.btnDanger,
                 ...(!checked ? styles.btnPrimaryDisabled : {}),
               }}
               disabled={!checked}
