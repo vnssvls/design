@@ -103,7 +103,10 @@ export default function App() {
 
   const validPositions = Array.from({ length: count }, (_, i) => (i + 1) as BGActiveButton);
   const currentLabels  = labels.slice(0, count);
-  const previewBg      = theme === 'grey' ? '#2A2A3A' : '#1C1C26';
+
+  // Use actual library bg colors so the component reads correctly in context
+  const previewBg      = theme === 'grey' ? '#2A2A3A' : '#0A0A0F';
+  const previewBgLabel = theme === 'grey' ? 'BG/DesignBase/Grey 4 — #2A2A3A' : 'BG/DesignBase/Grey 1 — #0A0A0F';
 
   const handleCount = (c: BGCount) => {
     setCount(c);
@@ -212,6 +215,7 @@ export default function App() {
                 <MetaLine label="style"         value={style} />
                 <MetaLine label="shape"         value={shape} />
                 <MetaLine label="theme"         value={theme} />
+                <MetaLine label="bg"            value={previewBgLabel} />
               </div>
             </div>
           </Card>
