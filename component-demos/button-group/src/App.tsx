@@ -105,8 +105,8 @@ export default function App() {
   const currentLabels  = labels.slice(0, count);
 
   // Use actual library bg colors so the component reads correctly in context
-  const previewBg      = theme === 'grey' ? '#2A2A3A' : '#0A0A0F';
-  const previewBgLabel = theme === 'grey' ? 'BG/DesignBase/Grey 4 — #2A2A3A' : 'BG/DesignBase/Grey 1 — #0A0A0F';
+  const previewBg      = theme === 'grey' ? '#212121' : '#0A0A0F';
+  const previewBgLabel = theme === 'grey' ? 'BG/DesignBase/Grey 2 — #212121' : 'BG/DesignBase/Grey 1 — #0A0A0F';
 
   const handleCount = (c: BGCount) => {
     setCount(c);
