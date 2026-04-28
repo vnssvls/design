@@ -53,7 +53,7 @@ export default function App() {
   const [showIcons,  setShowIcons]  = useState(true);
   const [active,     setActive]     = useState(1);
 
-  const previewBg = theme === 'white' ? '#2A2A3A' : surface;
+  const previewBg = theme === 'white' ? '#212121' : '#0A0A0F';
 
   return (
     <div style={{ background: bg, minHeight: '100vh', padding: 40, fontFamily: 'Inter, sans-serif' }}>
@@ -122,7 +122,7 @@ export default function App() {
             {counts.map(c => (
               <div key={c}>
                 <span style={{ fontSize: 11, color: textSecondary, display: 'block', marginBottom: 12 }}>{c} segments</span>
-                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', background: theme === 'white' ? '#2A2A3A' : 'transparent', padding: theme === 'white' ? '12px' : 0, borderRadius: 8 }}>
+                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', background: theme === 'white' ? '#212121' : 'transparent', padding: theme === 'white' ? '12px' : 0, borderRadius: 8 }}>
                   {Array.from({ length: c }).map((_, i) => (
                     <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                       <span style={{ fontSize: 10, color: textSecondary }}>active: {i + 1}</span>
@@ -146,7 +146,7 @@ export default function App() {
             {themes.map(t => (
               <div key={t} style={{
                 display: 'flex', flexDirection: 'column', gap: 8,
-                background: t === 'white' ? '#2A2A3A' : 'transparent',
+                background: t === 'white' ? '#212121' : 'transparent',
                 padding: t === 'white' ? 12 : 0, borderRadius: 8,
               }}>
                 <span style={{ fontSize: 11, color: textSecondary }}>{t}</span>
@@ -163,7 +163,7 @@ export default function App() {
             {sizes.map(s => (
               <div key={s}>
                 <span style={{ fontSize: 11, color: textSecondary, display: 'block', marginBottom: 10 }}>{s}</span>
-                <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', background: theme === 'white' ? '#2A2A3A' : 'transparent', padding: theme === 'white' ? '12px' : 0, borderRadius: 8 }}>
+                <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', background: theme === 'white' ? '#212121' : 'transparent', padding: theme === 'white' ? '12px' : 0, borderRadius: 8 }}>
                   {[1, 2].map(ab => (
                     <div key={ab} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                       <span style={{ fontSize: 10, color: textSecondary }}>active: {ab}</span>
@@ -183,7 +183,7 @@ export default function App() {
             {styles.map(st => themes.map(th => (
               <div key={`${st}-${th}`} style={{
                 display: 'flex', flexDirection: 'column', gap: 8,
-                background: th === 'white' ? '#2A2A3A' : 'transparent',
+                background: th === 'white' ? '#212121' : 'transparent',
                 padding: th === 'white' ? 12 : 0, borderRadius: 8,
               }}>
                 <span style={{ fontSize: 11, color: textSecondary }}>{st} / {th}</span>

@@ -106,7 +106,7 @@ export default function App() {
 
   // Use actual library bg colors so the component reads correctly in context
   const previewBg      = theme === 'grey' ? '#212121' : '#0A0A0F';
-  const previewBgLabel = theme === 'grey' ? 'BG/DesignBase/Grey 2 — #212121' : 'BG/DesignBase/Grey 1 — #0A0A0F';
+  const previewBgLabel = theme === 'grey' ? 'Neutral/Grey 700 — #212121' : 'BG/DesignBase/Grey 1 — #0A0A0F';
 
   const handleCount = (c: BGCount) => {
     setCount(c);
