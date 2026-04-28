@@ -2,108 +2,88 @@ import React from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type BGType        = 'tab' | 'nav';
-export type BGStyle       = 'tonal' | 'grey';
-export type BGShape       = 'pill' | 'squared';
-export type BGTheme       = 'dark' | 'white';
+export type BGCount        = 3 | 4;
+export type BGStyle        = 'default' | 'with-dot' | 'with-icon';
+export type BGShape        = 'rectangle' | 'rounded';
+export type BGTheme        = 'tonal' | 'grey';
 export type BGActiveButton = 1 | 2 | 3 | 4;
 
 export interface ButtonGroupProps {
-  type?:         BGType;
+  count?:        BGCount;
   style?:        BGStyle;
   shape?:        BGShape;
   theme?:        BGTheme;
   activeButton?: BGActiveButton;
+  labels?:       string[];
   onChange?:     (index: BGActiveButton) => void;
 }
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 
-const purple = '#BB86FC';
-
-const CONTAINER_BG: Record<BGStyle, string> = {
-  tonal: 'rgba(187,134,252,0.06)',
-  grey:  'rgba(255,255,255,0.06)',
+const CONTAINER_BG: Record<BGTheme, string> = {
+  tonal: 'rgba(155, 126, 189, 0.06)',
+  grey:  'rgba(255, 255, 255, 0.06)',
 };
 
-const ACTIVE_BG: Record<BGStyle, string> = {
-  tonal: 'rgba(187,134,252,0.25)',
-  grey:  'rgba(255,255,255,0.10)',
+const ACTIVE_BG: Record<BGTheme, string> = {
+  tonal: 'rgba(155, 126, 189, 0.25)',
+  grey:  'rgba(255, 255, 255, 0.10)',
 };
 
-const CONTAINER_STROKE = 'rgba(255,255,255,0.06)';
+const CONTAINER_STROKE = 'rgba(255, 255, 255, 0.06)';
+const ACTIVE_LABEL     = 'rgba(255, 255, 255, 1.0)';
+const INACTIVE_LABEL   = 'rgba(255, 255, 255, 0.50)';
+const DOT_COLOR        = '#BB86FC';
 
-const ACTIVE_LABEL:   Record<BGTheme, string> = {
-  dark:  'rgba(255,255,255,1.0)',
-  white: 'rgba(255,255,255,1.0)',
-};
+const CONTAINER_H = 34;
+const BUTTON_H    = 26;
+const H_PAD       = 12;
+const FONT_SIZE   = 12;
+const DOT_SIZE    = 6;
+const ICON_SIZE   = 12;
+const INDICATOR_GAP = 5;
 
-const INACTIVE_LABEL: Record<BGTheme, string> = {
-  dark:  'rgba(255,255,255,0.50)',
-  white: 'rgba(255,255,255,0.50)',
-};
-
-// ─── Label sets ───────────────────────────────────────────────────────────────
-
-const TAB_LABELS    = ['Last 7 days', 'Last 30 days', 'Last 90 days'] as const;
-// nav-3 is shown when activeButton is 1, 2, or 3
-const NAV_LABELS_3  = ['Variance', 'Suppliers', 'Recipe Cost'] as const;
-// nav-4 is shown when activeButton is 4
-const NAV_LABELS_4  = ['Items', 'Recipes', 'Tasks', 'Tab 4'] as const;
-
-function getLabels(type: BGType, activeButton: BGActiveButton): string[] {
-  if (type === 'tab') return [...TAB_LABELS];
-  // Nav shows 4 buttons only when active is 4
-  return activeButton === 4 ? [...NAV_LABELS_4] : [...NAV_LABELS_3];
-}
-
-// ─── Sizing ───────────────────────────────────────────────────────────────────
-
-const CONTAINER_H  = 34;   // px
-const BUTTON_H     = 26;   // px
-const H_PAD        = 12;   // px per button
-const FONT_SIZE    = 12;   // px
-const DOT_SIZE     = 6;    // px
-const DOT_GAP      = 5;    // px between dot and label
+const DEFAULT_LABELS = ['Label 1', 'Label 2', 'Label 3', 'Label 4'];
 
 // ─── Dot indicator ────────────────────────────────────────────────────────────
 
 function Dot() {
   return (
-    <span
-      style={{
-        width:        DOT_SIZE,
-        height:       DOT_SIZE,
-        borderRadius: '50%',
-        background:   purple,
-        flexShrink:   0,
-        display:      'inline-block',
-      }}
-    />
+    <span style={{
+      width: DOT_SIZE, height: DOT_SIZE,
+      borderRadius: '50%',
+      background: DOT_COLOR,
+      flexShrink: 0,
+      display: 'inline-block',
+    }} />
+  );
+}
+
+// ─── Icon placeholder (matches the target/dot icon from the Figma icon set) ──
+
+function Icon() {
+  return (
+    <svg width={ICON_SIZE} height={ICON_SIZE} viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
+      <circle cx="10" cy="10" r="6.5" stroke={DOT_COLOR} strokeWidth="1.5" />
+      <circle cx="10" cy="10" r="2.5" fill={DOT_COLOR} />
+    </svg>
   );
 }
 
 // ─── Single button ────────────────────────────────────────────────────────────
 
 interface ButtonItemProps {
-  label:     string;
-  isActive:  boolean;
-  bgStyle:   BGStyle;
-  theme:     BGTheme;
-  shape:     BGShape;
-  isFirst:   boolean;
-  isLast:    boolean;
-  onClick:   () => void;
+  label:    string;
+  isActive: boolean;
+  style:    BGStyle;
+  shape:    BGShape;
+  theme:    BGTheme;
+  onClick:  () => void;
 }
 
-function ButtonItem({
-  label, isActive, bgStyle, theme, shape, isFirst, isLast, onClick,
-}: ButtonItemProps) {
-  const innerRadius = shape === 'pill' ? 999 : 6;
-
-  // For pill shape we give inner buttons a slightly tighter radius
-  // to fit snugly inside the container; first/last buttons get full inner curve.
-  const borderRadius = innerRadius;
+function ButtonItem({ label, isActive, style, shape, theme, onClick }: ButtonItemProps) {
+  const radius = shape === 'rounded' ? 999 : 6;
+  const showIndicator = isActive && style !== 'default';
 
   return (
     <button
@@ -112,74 +92,69 @@ function ButtonItem({
         display:        'inline-flex',
         alignItems:     'center',
         justifyContent: 'center',
-        gap:            isActive ? DOT_GAP : 0,
+        gap:            showIndicator ? INDICATOR_GAP : 0,
         height:         BUTTON_H,
         paddingInline:  H_PAD,
-        borderRadius,
-        background:     isActive ? ACTIVE_BG[bgStyle] : 'transparent',
+        borderRadius:   radius,
+        background:     isActive ? ACTIVE_BG[theme] : 'transparent',
         border:         'none',
         cursor:         'pointer',
         transition:     'background 150ms ease',
         whiteSpace:     'nowrap',
         userSelect:     'none',
-        // Transition max-width so the dot doesn't cause layout jump
       }}
     >
-      {isActive && <Dot />}
-      <span
-        style={{
-          fontSize:   FONT_SIZE,
-          fontFamily: 'Inter, sans-serif',
-          fontWeight: 500,
-          color:      isActive ? ACTIVE_LABEL[theme] : INACTIVE_LABEL[theme],
-          transition: 'color 150ms ease',
-        }}
-      >
+      {isActive && style === 'with-dot'  && <Dot />}
+      {isActive && style === 'with-icon' && <Icon />}
+      <span style={{
+        fontSize:   FONT_SIZE,
+        fontFamily: 'Inter, sans-serif',
+        fontWeight: 500,
+        color:      isActive ? ACTIVE_LABEL : INACTIVE_LABEL,
+        transition: 'color 150ms ease',
+      }}>
         {label}
       </span>
     </button>
   );
 }
 
-// ─── ButtonGroup ─────────────────────────────────────────────────────────────
+// ─── ButtonGroup ──────────────────────────────────────────────────────────────
 
 export function ButtonGroup({
-  type         = 'nav',
-  style        = 'tonal',
-  shape        = 'pill',
-  theme        = 'dark',
+  count        = 3,
+  style        = 'default',
+  shape        = 'rectangle',
+  theme        = 'tonal',
   activeButton = 1,
+  labels,
   onChange,
 }: ButtonGroupProps) {
-  const labels       = getLabels(type, activeButton);
-  const containerR   = shape === 'pill' ? 999 : 8;
-  const containerPad = 4;
+  const containerRadius = shape === 'rounded' ? 999 : 8;
+  const resolvedLabels  = labels ?? DEFAULT_LABELS.slice(0, count);
+  const clampedActive   = Math.min(activeButton, count) as BGActiveButton;
 
   return (
-    <div
-      style={{
-        display:      'inline-flex',
-        alignItems:   'center',
-        height:       CONTAINER_H,
-        padding:      containerPad,
-        borderRadius: containerR,
-        background:   CONTAINER_BG[style],
-        border:       `1px solid ${CONTAINER_STROKE}`,
-        gap:          2,
-      }}
-    >
-      {labels.map((label, i) => {
+    <div style={{
+      display:      'inline-flex',
+      alignItems:   'center',
+      height:       CONTAINER_H,
+      padding:      4,
+      borderRadius: containerRadius,
+      background:   CONTAINER_BG[theme],
+      border:       `1px solid ${CONTAINER_STROKE}`,
+      gap:          2,
+    }}>
+      {resolvedLabels.map((label, i) => {
         const oneBasedIndex = (i + 1) as BGActiveButton;
         return (
           <ButtonItem
-            key={label}
+            key={i}
             label={label}
-            isActive={oneBasedIndex === activeButton}
-            bgStyle={style}
-            theme={theme}
+            isActive={oneBasedIndex === clampedActive}
+            style={style}
             shape={shape}
-            isFirst={i === 0}
-            isLast={i === labels.length - 1}
+            theme={theme}
             onClick={() => onChange?.(oneBasedIndex)}
           />
         );
