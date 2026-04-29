@@ -44,7 +44,7 @@ export function Checkbox({ state = 'unselected', size = 'medium', onChange }: Ch
   const hasFill = state === 'selected';
 
   const bg = hasFill ? tokens.primary : 'transparent';
-  const strokeColor = isSelected ? tokens.primary : tokens.muted;
+  const strokeColor = hasFill ? tokens.primary : state === 'unselected' ? tokens.muted : 'transparent';
   const checkColor = hasFill ? '#171213' : tokens.primary;
 
   function handleClick() {
