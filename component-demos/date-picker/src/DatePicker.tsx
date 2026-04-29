@@ -183,12 +183,14 @@ interface CalendarMonthProps {
   onDayClick?: (key: string) => void;
   onDayHover?: (key: string | null) => void;
   prevDisabled?: boolean;
+  missingDates?: Set<string>;
 }
 
 export function CalendarMonth({
   initYear = 2026, initMonth = 2,
   rangeStart = null, rangeEnd = null, hoverDate = null,
   onDayClick, onDayHover, prevDisabled = false,
+  missingDates,
 }: CalendarMonthProps) {
   const [year, setYear] = useState(initYear);
   const [month, setMonth] = useState(initMonth);
@@ -228,8 +230,12 @@ export function CalendarMonth({
               tabIndex={!day ? -1 : 0}
             >
               {day ?? null}
-              {state === 'today' && (
-                <span style={{ position: 'absolute', bottom: 3, left: '50%', transform: 'translateX(-50%)', width: 4, height: 4, borderRadius: '50%', background: T.primary }} />
+              {(state === 'today' || (day && missingDates?.has(toDateKey(year, month, day)))) && (
+                <span style={{
+                  position: 'absolute', bottom: 3, left: '50%', transform: 'translateX(-50%)',
+                  width: 4, height: 4, borderRadius: '50%',
+                  background: (day && missingDates?.has(toDateKey(year, month, day))) ? T.warning : T.primary,
+                }} />
               )}
             </button>
           );
@@ -317,7 +323,7 @@ function FooterActions({ children }: { children: React.ReactNode }) {
 }
 
 // ── picker.panel type=custom-range ────────────────────────────────────────────
-export function PickerPanelCustomRange({ showIndicator = true }: { showIndicator?: boolean }) {
+export function PickerPanelCustomRange({ showIndicator = true, missingDates }: { showIndicator?: boolean; missingDates?: Set<string> }) {
   const [rangeStart, setRangeStart] = useState<string | null>(null);
   const [rangeEnd, setRangeEnd] = useState<string | null>(null);
   const [hover, setHover] = useState<string | null>(null);
@@ -342,9 +348,9 @@ export function PickerPanelCustomRange({ showIndicator = true }: { showIndicator
     <div style={panelStyle}>
       <PickerHeader rangeStart={displayStart} rangeEnd={displayEnd} showIndicator={showIndicator} />
       <div style={{ display: 'flex' }}>
-        <CalendarMonth initYear={2026} initMonth={2} rangeStart={displayStart} rangeEnd={displayEnd} hoverDate={hover} onDayClick={selectDate} onDayHover={setHover} />
+        <CalendarMonth initYear={2026} initMonth={2} rangeStart={displayStart} rangeEnd={displayEnd} hoverDate={hover} onDayClick={selectDate} onDayHover={setHover} missingDates={missingDates} />
         <div style={vDividerStyle} />
-        <CalendarMonth initYear={2026} initMonth={3} rangeStart={displayStart} rangeEnd={displayEnd} hoverDate={hover} onDayClick={selectDate} onDayHover={setHover} />
+        <CalendarMonth initYear={2026} initMonth={3} rangeStart={displayStart} rangeEnd={displayEnd} hoverDate={hover} onDayClick={selectDate} onDayHover={setHover} missingDates={missingDates} />
       </div>
       <Footer>
         <FooterBtn onClick={reset}>Reset</FooterBtn>
@@ -358,7 +364,7 @@ export function PickerPanelCustomRange({ showIndicator = true }: { showIndicator
 }
 
 // ── picker.panel type=month-only ──────────────────────────────────────────────
-export function PickerPanelMonthOnly() {
+export function PickerPanelMonthOnly({ missingDates }: { missingDates?: Set<string> } = {}) {
   const [pending, setPending] = useState<{ start: string | null; end: string | null }>({ start: null, end: null });
   const [applied, setApplied] = useState({ start: '2026-03-03', end: '2026-03-14' });
   const [hover, setHover] = useState<string | null>(null);
@@ -377,7 +383,7 @@ export function PickerPanelMonthOnly() {
   return (
     <div style={panelStyle}>
       <PickerHeader rangeStart={displayStart} rangeEnd={displayEnd} />
-      <CalendarMonth initYear={2026} initMonth={2} rangeStart={displayStart} rangeEnd={displayEnd} hoverDate={hover} onDayClick={selectDate} onDayHover={setHover} />
+      <CalendarMonth initYear={2026} initMonth={2} rangeStart={displayStart} rangeEnd={displayEnd} hoverDate={hover} onDayClick={selectDate} onDayHover={setHover} missingDates={missingDates} />
       <Footer>
         <FooterActions>
           <FooterBtn onClick={cancel}>Cancel</FooterBtn>
@@ -399,7 +405,7 @@ const PRESETS = [
   { label: 'YTD',          start: '2026-01-01', end: '2026-04-29' },
 ] as const;
 
-export function PickerPanelWithPresets({ showIndicator = true }: { showIndicator?: boolean }) {
+export function PickerPanelWithPresets({ showIndicator = true, missingDates }: { showIndicator?: boolean; missingDates?: Set<string> }) {
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [applied, setApplied] = useState({ start: '2026-03-03', end: '2026-03-14' });
   const [pending, setPending] = useState<{ start: string | null; end: string | null }>({ start: null, end: null });
@@ -438,7 +444,7 @@ export function PickerPanelWithPresets({ showIndicator = true }: { showIndicator
           ))}
         </div>
         <div style={vDividerStyle} />
-        <CalendarMonth initYear={2026} initMonth={2} rangeStart={displayStart} rangeEnd={displayEnd} hoverDate={hover} onDayClick={selectDate} onDayHover={setHover} />
+        <CalendarMonth initYear={2026} initMonth={2} rangeStart={displayStart} rangeEnd={displayEnd} hoverDate={hover} onDayClick={selectDate} onDayHover={setHover} missingDates={missingDates} />
       </div>
       <Footer>
         <FooterActions>
