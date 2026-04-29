@@ -120,7 +120,7 @@ export default function App() {
 
         <h1 style={{ color: textPrimary, fontSize: 22, fontWeight: 600, marginBottom: 4 }}>MetricCard</h1>
         <p style={{ color: textSecondary, fontSize: 13, marginBottom: 40 }}>
-          Standard (32 variants) + Playground (3 states)
+          Standard (28 variants) + Playground (3 states)
         </p>
 
         {/* ══════ STANDARD METRIC CARD ══════ */}
