@@ -95,7 +95,7 @@ export const Avatar: React.FC<AvatarProps> = ({
             width: ringD,
             height: ringD,
             borderRadius: '50%',
-            border: `2px solid ${COLORS.ring}`,
+            border: `1px solid ${type === 'brand' ? '#FFFFFF' : COLORS.ring}`,
             boxSizing: 'border-box',
             pointerEvents: 'none',
           }}
