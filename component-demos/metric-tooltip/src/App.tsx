@@ -1,5 +1,5 @@
 import React from 'react';
-import { MetricTooltip } from './MetricTooltip';
+import { MetricTooltip, Theme } from './MetricTooltip';
 
 const THEORETICAL = {
   title: 'Theoretical COGS %',
@@ -15,95 +15,98 @@ const VARIANCE = {
   watchNote: 'A negative variance means you are spending more than planned. Investigate portion control and waste.',
 };
 
-const WASTAGE = {
-  title: 'Wastage %',
-  description: 'The cost of ingredients recorded as waste during the selected period, as a percentage of revenue.',
-  formula: 'Total Waste Cost / Revenue',
-  watchNote: 'High wastage often signals over-ordering, poor rotation, or prep inefficiency.',
-};
-
 const UNDEFINED_SALES = {
   title: 'Undefined Sales %',
-  description: 'Revenue from items sold that have no matching recipe, so their ingredient cost cannot be tracked.',
+  description: 'Revenue from items sold that have no matching recipe — ingredient cost cannot be tracked.',
   watchNote: 'High undefined sales means your recipe library is incomplete. Missing recipes create blind spots in COGS.',
 };
 
-function Section({ label, children }: { label: string; children: React.ReactNode }) {
+const STOCK_COUNT = {
+  title: 'Stock Count',
+  description: 'The last completed stock count for this location. Used to calculate actual vs. theoretical consumption.',
+};
+
+function Label({ text }: { text: string }) {
   return (
-    <div style={{ marginBottom: 48 }}>
-      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, fontFamily: 'Inter, sans-serif', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 24 }}>
-        {label}
-      </p>
-      <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-        {children}
-      </div>
+    <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, fontFamily: 'Inter, sans-serif', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, margin: '0 0 20px' }}>
+      {text}
+    </p>
+  );
+}
+
+function Row({ children }: { children: React.ReactNode }) {
+  return <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' as const, alignItems: 'flex-start', marginBottom: 56 }}>{children}</div>;
+}
+
+function ThemeBlock({ theme }: { theme: Theme }) {
+  const bg = theme === 'Tonal' ? '#0A0A0F' : '#2a2a2a';
+  return (
+    <div style={{ background: bg, padding: 24, borderRadius: 12, display: 'flex', gap: 32, flexWrap: 'wrap' as const, alignItems: 'flex-start' }}>
+      <MetricTooltip {...THEORETICAL} theme={theme} caretPosition="top" />
+      <MetricTooltip {...VARIANCE} theme={theme} caretPosition="top" />
+      <MetricTooltip {...UNDEFINED_SALES} theme={theme} caretPosition="top" showFormula={false} />
     </div>
   );
 }
 
 export default function App() {
   return (
-    <div style={{ background: '#0A0A0F', minHeight: '100vh', padding: '48px 48px 80px', boxSizing: 'border-box' }}>
-      <h1 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 22, color: '#fff', marginBottom: 8 }}>MetricTooltip</h1>
-      <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 56 }}>
-        Node 795:59 — Contextual tooltip for metric cards
+    <div style={{ background: '#0A0A0F', minHeight: '100vh', padding: '48px 48px 80px', boxSizing: 'border-box' as const }}>
+      <h1 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 22, color: '#fff', margin: '0 0 4px' }}>MetricTooltip</h1>
+      <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: '0 0 56px' }}>
+        Node 1777:5721 · 8 variants · theme × caretPosition
       </p>
 
-      <Section label="Full variant — all sections">
-        <MetricTooltip {...THEORETICAL} showCaret caretPosition="top" />
-        <MetricTooltip {...VARIANCE} showCaret caretPosition="top" />
-        <MetricTooltip {...WASTAGE} showCaret caretPosition="top" />
-      </Section>
+      <Label text="theme=Tonal" />
+      <ThemeBlock theme="Tonal" />
 
-      <Section label="No formula (watch note only)">
-        <MetricTooltip {...UNDEFINED_SALES} showCaret caretPosition="top" showFormula={false} />
-        <MetricTooltip {...THEORETICAL} showCaret caretPosition="top" showFormula={false} />
-      </Section>
+      <Label text="theme=Grey" />
+      <ThemeBlock theme="Grey" />
 
-      <Section label="Description only — no formula, no watch note">
-        <MetricTooltip
-          title="Stock Count"
-          description="The last completed stock count for this location. Used to calculate actual consumption against theoretical usage."
-          showFormula={false}
-          showWatchNote={false}
-          showCaret
-          caretPosition="top"
-        />
-        <MetricTooltip
-          title="Revenue"
-          description="Total POS revenue for the selected period. Only visible when a POS integration is active."
-          showFormula={false}
-          showWatchNote={false}
-          showCaret
-          caretPosition="top"
-        />
-      </Section>
+      <Label text="caretPosition — all 4 directions (Tonal)" />
+      <Row>
+        {(['top', 'bottom', 'left', 'right'] as const).map(pos => (
+          <div key={pos} style={{ display: 'flex', flexDirection: 'column' as const, gap: 8 }}>
+            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontFamily: 'Inter', textAlign: 'center' as const }}>{pos}</span>
+            <div style={{ padding: pos === 'top' ? '12px 0 0' : pos === 'bottom' ? '0 0 12px' : pos === 'left' ? '0 0 0 12px' : '0 12px 0 0' }}>
+              <MetricTooltip
+                title="Theoretical COGS %"
+                description="The ideal cost of goods sold with no waste or errors."
+                theme="Tonal"
+                caretPosition={pos}
+                showFormula={false}
+                showWatchNote={false}
+              />
+            </div>
+          </div>
+        ))}
+      </Row>
 
-      <Section label="Caret positions">
-        <div style={{ padding: 24, display: 'flex', gap: 48, alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ paddingTop: 16 }}>
-            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, fontFamily: 'Inter', marginBottom: 12 }}>caretPosition="top"</p>
-            <MetricTooltip title="Theoretical COGS %" description="The ideal cost of goods sold with no waste or errors." showFormula={false} showWatchNote={false} showCaret caretPosition="top" />
-          </div>
-          <div style={{ paddingBottom: 16 }}>
-            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, fontFamily: 'Inter', marginBottom: 12 }}>caretPosition="bottom"</p>
-            <MetricTooltip title="Theoretical COGS %" description="The ideal cost of goods sold with no waste or errors." showFormula={false} showWatchNote={false} showCaret caretPosition="bottom" />
-          </div>
-          <div style={{ paddingLeft: 24 }}>
-            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, fontFamily: 'Inter', marginBottom: 12 }}>caretPosition="left"</p>
-            <MetricTooltip title="Theoretical COGS %" description="The ideal cost of goods sold with no waste or errors." showFormula={false} showWatchNote={false} showCaret caretPosition="left" />
-          </div>
-          <div style={{ paddingRight: 24 }}>
-            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, fontFamily: 'Inter', marginBottom: 12 }}>caretPosition="right"</p>
-            <MetricTooltip title="Theoretical COGS %" description="The ideal cost of goods sold with no waste or errors." showFormula={false} showWatchNote={false} showCaret caretPosition="right" />
-          </div>
+      <Label text="showFormula + showWatchNote booleans" />
+      <Row>
+        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 8 }}>
+          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontFamily: 'Inter' }}>both true (default)</span>
+          <MetricTooltip {...THEORETICAL} theme="Tonal" showCaret={false} />
         </div>
-      </Section>
+        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 8 }}>
+          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontFamily: 'Inter' }}>showFormula=false</span>
+          <MetricTooltip {...THEORETICAL} theme="Tonal" showFormula={false} showCaret={false} />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 8 }}>
+          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontFamily: 'Inter' }}>showWatchNote=false</span>
+          <MetricTooltip {...THEORETICAL} theme="Tonal" showWatchNote={false} showCaret={false} />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 8 }}>
+          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontFamily: 'Inter' }}>description only</span>
+          <MetricTooltip {...STOCK_COUNT} theme="Tonal" showFormula={false} showWatchNote={false} showCaret={false} />
+        </div>
+      </Row>
 
-      <Section label="No caret">
-        <MetricTooltip {...THEORETICAL} showCaret={false} />
-        <MetricTooltip {...UNDEFINED_SALES} showCaret={false} showFormula={false} />
-      </Section>
+      <Label text="showCaret=false" />
+      <Row>
+        <MetricTooltip {...THEORETICAL} theme="Tonal" showCaret={false} />
+        <MetricTooltip {...VARIANCE} theme="Grey" showCaret={false} />
+      </Row>
     </div>
   );
 }
