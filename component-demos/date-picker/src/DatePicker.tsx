@@ -53,7 +53,7 @@ function buildCells(year: number, month: number): Array<number | null> {
   return cells;
 }
 
-type DayState = 'default' | 'hover' | 'active' | 'range' | 'today' | 'disabled' | 'hidden';
+type DayState = 'default' | 'hover' | 'active-start' | 'active-end' | 'active-solo' | 'range' | 'today' | 'disabled' | 'hidden';
 
 function getDayState(
   day: number | null,
@@ -69,11 +69,17 @@ function getDayState(
   const isToday = now.getFullYear() === year && now.getMonth() === month && now.getDate() === day;
 
   if (rangeStart && rangeEnd) {
-    if (key === rangeStart || key === rangeEnd) return 'active';
+    if (key === rangeStart) return 'active-start';
+    if (key === rangeEnd) return 'active-end';
     if (key > rangeStart && key < rangeEnd) return 'range';
   } else if (rangeStart) {
-    if (key === rangeStart) return 'active';
-    if (hoverDate && key > rangeStart && key <= hoverDate) return 'range';
+    if (key === rangeStart) {
+      return hoverDate && hoverDate > rangeStart ? 'active-start' : 'active-solo';
+    }
+    if (hoverDate && hoverDate > rangeStart) {
+      if (key === hoverDate) return 'active-end';
+      if (key > rangeStart && key < hoverDate) return 'range';
+    }
   }
   return isToday ? 'today' : 'default';
 }
@@ -87,19 +93,56 @@ const MONTH_NAMES = ['January','February','March','April','May','June','July','A
 const WEEKDAYS = ['Mo','Tu','We','Th','Fr','Sa','Su'];
 
 // ── Styled helpers ────────────────────────────────────────────────────────────
-const dayStyle = (state: DayState): React.CSSProperties => {
+// colIndex: 0=Mon … 6=Sun. Used to round row-boundary edges of the range strip.
+const dayStyle = (state: DayState, colIndex: number): React.CSSProperties => {
+  const isFirstCol = colIndex === 0;
+  const isLastCol  = colIndex === 6;
+
   const base: React.CSSProperties = {
     width: 34, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
-    fontSize: 13, borderRadius: 6, cursor: state === 'disabled' || state === 'hidden' ? 'not-allowed' : 'pointer',
+    fontSize: 13, cursor: state === 'disabled' || state === 'hidden' ? 'not-allowed' : 'pointer',
     border: 'none', background: 'transparent', color: T.textPrimary, fontFamily: 'Inter, sans-serif',
     position: 'relative', visibility: state === 'hidden' ? 'hidden' : 'visible',
-    opacity: state === 'disabled' ? 0.4 : 1,
+    opacity: state === 'disabled' ? 0.4 : 1, padding: 0,
   };
-  if (state === 'active')  return { ...base, background: T.primary, color: T.primaryDark, fontWeight: 600 };
-  if (state === 'range')   return { ...base, background: T.primary10 };
-  if (state === 'hover')   return { ...base, background: T.primary8 };
-  if (state === 'today')   return { ...base, color: T.primary, fontWeight: 600 };
-  return base;
+
+  // Range strip: flat sides except at row boundaries (caps the strip visually)
+  if (state === 'range') {
+    return {
+      ...base, background: T.primary10,
+      borderTopLeftRadius:    isFirstCol ? 6 : 0,
+      borderBottomLeftRadius: isFirstCol ? 6 : 0,
+      borderTopRightRadius:   isLastCol  ? 6 : 0,
+      borderBottomRightRadius: isLastCol ? 6 : 0,
+    };
+  }
+
+  // Active start: left pill cap, right flat (connects to range strip); fully round if at row end
+  if (state === 'active-start') {
+    return {
+      ...base, background: T.primary, color: T.primaryDark, fontWeight: 600,
+      borderTopLeftRadius: 6, borderBottomLeftRadius: 6,
+      borderTopRightRadius:    isLastCol ? 6 : 0,
+      borderBottomRightRadius: isLastCol ? 6 : 0,
+    };
+  }
+
+  // Active end: right pill cap, left flat (connects to range strip); fully round if at row start
+  if (state === 'active-end') {
+    return {
+      ...base, background: T.primary, color: T.primaryDark, fontWeight: 600,
+      borderTopRightRadius: 6, borderBottomRightRadius: 6,
+      borderTopLeftRadius:    isFirstCol ? 6 : 0,
+      borderBottomLeftRadius: isFirstCol ? 6 : 0,
+    };
+  }
+
+  // Solo active (start selected, no range yet)
+  if (state === 'active-solo') return { ...base, background: T.primary, color: T.primaryDark, fontWeight: 600, borderRadius: 6 };
+
+  if (state === 'hover') return { ...base, background: T.primary8, borderRadius: 6 };
+  if (state === 'today') return { ...base, color: T.primary, fontWeight: 600, borderRadius: 6 };
+  return { ...base, borderRadius: 6 };
 };
 
 // ── Calendar / Nav ────────────────────────────────────────────────────────────
@@ -170,14 +213,15 @@ export function CalendarMonth({
           <div key={d} style={{ height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600, color: T.textMuted, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{d}</div>
         ))}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 34px)', gap: '2px 0' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 34px)', rowGap: 2 }}>
         {cells.map((day, i) => {
+          const colIndex = i % 7;
           const state = getDayState(day, year, month, rangeStart, rangeEnd, hoverDate);
           const key = day ? toDateKey(year, month, day) : `empty-${i}`;
           return (
             <button
               key={key}
-              style={dayStyle(state)}
+              style={dayStyle(state, colIndex)}
               onClick={() => day && onDayClick?.(toDateKey(year, month, day))}
               onMouseEnter={() => day && onDayHover?.(toDateKey(year, month, day))}
               onMouseLeave={() => onDayHover?.(null)}
@@ -410,7 +454,7 @@ export function PickerPanelWithPresets({ showIndicator = true }: { showIndicator
 const PERIOD_MONTHS = ['Jan 1-31','Feb 1-28','Mar 1-31','Apr 1-30','May 1-31','Jun 1-30','Jul 1-31','Aug 1-31','Sep 1-30','Oct 1-31','Nov 1-30','Dec 1-31'];
 const PERIOD_YEARS = ['2026','2025','2024','2023'];
 
-export function PickerPanelPeriod({ onSwitchToCustom }: { onSwitchToCustom?: () => void }) {
+export function PickerPanelPeriod({ onSwitchToCustom, showIndicator = true }: { onSwitchToCustom?: () => void; showIndicator?: boolean }) {
   const [selectedMonth, setSelectedMonth] = useState('Mar 1-31');
   const [selectedYear, setSelectedYear] = useState('2026');
   const [applied, setApplied] = useState({ month: 'Mar 1-31', year: '2026' });
@@ -419,7 +463,7 @@ export function PickerPanelPeriod({ onSwitchToCustom }: { onSwitchToCustom?: () 
 
   return (
     <div style={panelStyle}>
-      <PickerHeader label={`${applied.month} ${applied.year}`} />
+      <PickerHeader label={`${applied.month} ${applied.year}`} showIndicator={showIndicator} />
       <div style={{ display: 'flex', height: 340, overflow: 'hidden' }}>
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
           {PERIOD_MONTHS.map(m => (
