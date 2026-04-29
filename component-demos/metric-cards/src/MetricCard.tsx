@@ -153,7 +153,7 @@ export function MetricCard({
   const valueColor  = isNull ? NULL_COLOR : VALUE_COLOR;
   const valueFontSz = isMobile ? 14 : 20;
   const cardW       = 161;
-  const cardH       = isMobile ? 61 : isNull ? 97 : 101;
+  const cardH       = isMobile ? 61 : 101;
   const labelFontSz = isMobile ? 10 : 11;
 
   return (
@@ -189,6 +189,9 @@ export function MetricCard({
         fontWeight: 600,
         color: valueColor,
         letterSpacing: '-0.01em',
+        height: 20,
+        lineHeight: '20px',
+        display: 'block',
       }}>
         {displayValue}
       </span>
