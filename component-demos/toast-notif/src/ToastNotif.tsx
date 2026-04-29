@@ -48,8 +48,8 @@ const CheckIcon: React.FC<{ color: string }> = ({ color }) => (
 // Warning icon — triangle with !
 const WarningIcon: React.FC<{ color: string }> = ({ color }) => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M10 3L17.5 16.5H2.5L10 3Z" stroke={color} strokeWidth="1.5" strokeLinejoin="round" />
-    <rect x="9.25" y="8" width="1.5" height="4" rx="0.75" fill={color} />
+    <circle cx="10" cy="10" r="8" stroke={color} strokeWidth="1.5" />
+    <rect x="9.25" y="5.5" width="1.5" height="6" rx="0.75" fill={color} />
     <rect x="9.25" y="13" width="1.5" height="1.5" rx="0.75" fill={color} />
   </svg>
 );
