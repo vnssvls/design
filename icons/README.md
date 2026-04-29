@@ -7,10 +7,10 @@ Raw SVG exports from the Figma component library. Use these as the canonical sou
 ```
 icons/svg/
   action/   — interactive action icons (scan, download, eye, attach, search, share, edit, add, filter, ellipsis, sync)
-  metric/   — metric card icons (variance, wastage, cogs)
+  metric/   — metric card icons (variance, wastage, cogs, link-broken)
   nav/      — navigation icons (chevrons, arrows, trend indicators)
   status/   — state and feedback icons (warning, check, cross, sync, question, face-smile, face-neutral, face-sad)
-  ui/       — utility UI icons (link-broken, load-item, pencil, trash, person)
+  ui/       — utility UI icons (load-item, pencil, trash, person)
 ```
 
 ## Color
@@ -42,7 +42,7 @@ Note: `ui/load-item.svg`, `ui/pencil.svg`, and `ui/trash.svg` include `fill-opac
 | icon-variance | `138:942` |
 | icon-wastage | `138:950` |
 | icon-cogs | `138:954` |
-| icon-link-broken | `138:958` |
+| icon-link-broken (metric) | `138:958` |
 | icon.load-item | `1003:4902` |
 | icon-pencil2 | `1003:4910` |
 | icon-trash | `1003:4918` |
