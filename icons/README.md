@@ -1,57 +1,60 @@
-# Stockifi Icons
+# Stockifi App Icons — SVG
 
-Raw SVG files for the Stockifi design system. These are the canonical source files — use these when implementing icons in Flutter or any other platform.
+Raw SVG exports from the Figma component library. Use these as the canonical source for icon implementation in Flutter and other targets.
+
+## Folder structure
+
+```
+icons/svg/
+  action/   — interactive action icons (scan, download, eye, attach, search, share, edit, add, filter, ellipsis, sync)
+  metric/   — metric card icons (variance, wastage, cogs)
+  nav/      — navigation icons (chevrons, arrows, trend indicators)
+  status/   — state and feedback icons (warning, check, cross, sync, question, face-smile, face-neutral, face-sad)
+  ui/       — utility UI icons (link-broken, load-item, pencil, trash, person)
+```
 
 ## Color
 
-All icons use `currentColor` (or `fill="currentColor"` / `stroke="currentColor"`). Set color at the element level in your implementation — do not hardcode hex values here.
+All icons use `currentColor` for fills and strokes. Apply the correct color token at implementation:
 
-Token reference for each context:
+| Context | Token | Hex |
+|---------|-------|-----|
+| Primary / interactive | `Purple/Primary 700` | `#BB86FC` |
+| Success / positive | `Semantics/Success` | `#47B881` |
+| Warning / caution | `Semantics/Warning` | `#FF863B` |
+| Error / critical | `Semantics/Error` | `#BA4C4E` |
+| Default (white) | `Base/White` | `#FFFFFF` |
+| Muted | `Text/Muted` | `#9898B0` |
 
-| Usage | Token | Hex |
-|---|---|---|
-| Status — Info | — | `#4781C4` |
-| Status — Success | — | `#0C9D61` |
-| Status — Warning | — | `#FF863B` |
-| Status — Error | — | `#BA4C4E` |
-| Person icon (on dark bg) | `Base/White` | `#FFFFFF` |
-| Person icon (brand color) | `Purple/Primary 700` | `#BB86FC` |
-
-## Files
-
-### Status icons (`20×20`, `viewBox="0 0 20 20"`)
-
-Used in `toast.notif` and any contextual feedback UI.
-
-| File | Usage |
-|---|---|
-| `status-info.svg` | Info state — circle with i |
-| `status-success.svg` | Success state — circle with checkmark |
-| `status-warning.svg` | Warning state — circle with ! |
-| `status-error.svg` | Error state — circle with × |
-
-### Person icon (`256×256`, `viewBox="0 0 256 256"`)
-
-Source: [Phosphor Icons](https://phosphoricons.com) — Regular weight.
-
-| File | Usage |
-|---|---|
-| `person.svg` | Placeholder state in Avatar component |
-
-Scale to display size at implementation time (15px / 20px / 28px / 40px depending on avatar size — see Avatar component doc).
+Note: `ui/load-item.svg`, `ui/pencil.svg`, and `ui/trash.svg` include `fill-opacity="0.7"` or `stroke-opacity="0.7"` — this matches the design intent for those icons in their original context (secondary UI actions).
 
 ## Figma source
 
-All icons live in the **Component Library** Figma file under the **Icons** page.
+**File:** Design Components (`KuL3n9S8FiZuvD6F7P6Lv5`)  
+**Page:** Icons
 
-- Status icons: `base icon=[type], semantic=[type], size=medium-20x20`
-- Person icon set: `icon-person` — node `1807:1136` — 8 variants (`semantic` × `size`)
+| Icon group | Component set node |
+|---|---|
+| action-icons | `138:928` |
+| status-icons | `138:924` |
+| nav-chevrons | `138:934` |
+| nav-arrows | `138:938` |
+| icon-variance | `138:942` |
+| icon-wastage | `138:950` |
+| icon-cogs | `138:954` |
+| icon-link-broken | `138:958` |
+| icon.load-item | `1003:4902` |
+| icon-pencil2 | `1003:4910` |
+| icon-trash | `1003:4918` |
 
-## Updating icons
+Person icon (`ui/person.svg`, `256×256`): Phosphor Icons Regular weight. Used in Avatar component — scale to 15/20/28/40px at implementation depending on avatar size.
 
-1. Fix the icon in Figma first (source of truth)
-2. Export the updated SVG from Figma (or copy the vector path)
-3. Replace the file here — keep `currentColor`, strip any hardcoded fills
-4. Update the relevant Confluence component page changelog
+## Update workflow
 
-If the path geometry changes in a way that affects rendered output, note it in the commit message so devs know to re-implement.
+When an icon changes in Figma:
+1. Export the updated node via `node.exportAsync({ format: 'SVG_STRING' })`
+2. Replace the fill/stroke color with `currentColor`
+3. Update the file in this folder
+4. Commit with `chore: update [icon-name] SVG`
+
+Devs pull from `main` on the `vnssvls/design` repo.
