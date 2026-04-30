@@ -120,15 +120,22 @@ export default function App() {
       {/* ── picker.trigger ── */}
       <div style={{ marginBottom: 64 }}>
         <SectionLabel>picker.trigger — Variants</SectionLabel>
-        <PreviewCard gap={12} bg={cardBg}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <div><ColLabel>calendar · rest</ColLabel><PickerTrigger type="calendar" /></div>
-              <div><ColLabel>calendar · active</ColLabel><PickerTrigger type="calendar" active /></div>
-              <div><ColLabel>calendar · icon-only</ColLabel><PickerTrigger type="calendar" mode="icon-only" /></div>
-            </div>
-          </div>
-        </PreviewCard>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {(['tonal', 'grey'] as const).map(th => (
+            <PreviewCard key={th} gap={12} bg={th === 'tonal' ? T.bg : T.bgGrey}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
+                <ColLabel>{th}</ColLabel>
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                  <div><ColLabel>calendar · rest</ColLabel><PickerTrigger type="calendar" theme={th} /></div>
+                  <div><ColLabel>calendar · filled</ColLabel><PickerTrigger type="calendar" active theme={th} /></div>
+                  <div><ColLabel>period · rest</ColLabel><PickerTrigger type="period" theme={th} /></div>
+                  <div><ColLabel>period · filled</ColLabel><PickerTrigger type="period" active theme={th} /></div>
+                  <div><ColLabel>icon-only</ColLabel><PickerTrigger type="calendar" mode="icon-only" theme={th} /></div>
+                </div>
+              </div>
+            </PreviewCard>
+          ))}
+        </div>
       </div>
 
       <hr style={{ border: 'none', borderTop: `1px solid ${T.border}`, margin: '0 0 48px' }} />
@@ -154,10 +161,10 @@ export default function App() {
           ))}
         </div>
 
-        {panelTab === 'custom-range'  && <PickerPanelCustomRange missingDates={MISSING_DATES} />}
-        {panelTab === 'month-only'    && <PickerPanelMonthOnly missingDates={MISSING_DATES} />}
-        {panelTab === 'with-presets'  && <PickerPanelWithPresets missingDates={MISSING_DATES} />}
-        {panelTab === 'period'        && <PickerPanelPeriod onSwitchToCustom={switchToCustomRange} />}
+        {panelTab === 'custom-range'  && <PickerPanelCustomRange missingDates={MISSING_DATES} theme={theme} />}
+        {panelTab === 'month-only'    && <PickerPanelMonthOnly missingDates={MISSING_DATES} theme={theme} />}
+        {panelTab === 'with-presets'  && <PickerPanelWithPresets missingDates={MISSING_DATES} theme={theme} />}
+        {panelTab === 'period'        && <PickerPanelPeriod onSwitchToCustom={switchToCustomRange} theme={theme} />}
       </div>
     </div>
   );

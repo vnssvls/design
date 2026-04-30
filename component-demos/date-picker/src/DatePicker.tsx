@@ -6,7 +6,7 @@ const T = {
   surface:     '#0F0F12',
   surfacePurp: '#17131B',
   surface3:    '#1C1C26',
-  panelBg:     '#101012',
+  panelBg:     '#212121',
   primary:     '#BB86FC',
   primary8:    'rgba(187,134,252,0.08)',
   primary10:   'rgba(187,134,252,0.10)',
@@ -279,10 +279,18 @@ export function PickerHeader({ rangeStart, rangeEnd, label, showIndicator = fals
 }
 
 // ── Shared footer ─────────────────────────────────────────────────────────────
-const panelStyle: React.CSSProperties = {
-  background: T.panelBg, border: `1px solid ${T.border}`, borderRadius: 12,
-  overflow: 'hidden', display: 'inline-flex', flexDirection: 'column',
+const PANEL_BG: Record<'tonal' | 'grey', string> = { tonal: '#0F0F12', grey: '#212121' };
+const TRIGGER_BG: Record<'tonal' | 'grey', { rest: string; filled: string }> = {
+  tonal: { rest: '#0A0A0F', filled: '#17131B' },
+  grey:  { rest: '#212121', filled: '#1C1C26' },
 };
+
+function panelStyle(theme: 'tonal' | 'grey' = 'grey'): React.CSSProperties {
+  return {
+    background: PANEL_BG[theme], border: `1px solid ${T.border}`, borderRadius: 12,
+    overflow: 'hidden', display: 'inline-flex', flexDirection: 'column',
+  };
+}
 
 const vDividerStyle: React.CSSProperties = { width: 1, background: T.border, flexShrink: 0 };
 const hDividerStyle: React.CSSProperties = { height: 1, background: T.border, flexShrink: 0 };
@@ -323,7 +331,7 @@ function FooterActions({ children }: { children: React.ReactNode }) {
 }
 
 // ── picker.panel type=custom-range ────────────────────────────────────────────
-export function PickerPanelCustomRange({ showIndicator = true, missingDates }: { showIndicator?: boolean; missingDates?: Set<string> }) {
+export function PickerPanelCustomRange({ showIndicator = true, missingDates, theme = 'grey' }: { showIndicator?: boolean; missingDates?: Set<string>; theme?: 'tonal' | 'grey' }) {
   const [rangeStart, setRangeStart] = useState<string | null>(null);
   const [rangeEnd, setRangeEnd] = useState<string | null>(null);
   const [hover, setHover] = useState<string | null>(null);
@@ -345,7 +353,7 @@ export function PickerPanelCustomRange({ showIndicator = true, missingDates }: {
   const displayEnd = rangeEnd || (rangeStart ? null : applied.end);
 
   return (
-    <div style={panelStyle}>
+    <div style={panelStyle(theme)}>
       <PickerHeader rangeStart={displayStart} rangeEnd={displayEnd} showIndicator={showIndicator} />
       <div style={{ display: 'flex' }}>
         <CalendarMonth initYear={2026} initMonth={2} rangeStart={displayStart} rangeEnd={displayEnd} hoverDate={hover} onDayClick={selectDate} onDayHover={setHover} missingDates={missingDates} />
@@ -364,7 +372,7 @@ export function PickerPanelCustomRange({ showIndicator = true, missingDates }: {
 }
 
 // ── picker.panel type=month-only ──────────────────────────────────────────────
-export function PickerPanelMonthOnly({ missingDates }: { missingDates?: Set<string> } = {}) {
+export function PickerPanelMonthOnly({ missingDates, theme = 'grey' }: { missingDates?: Set<string>; theme?: 'tonal' | 'grey' } = {}) {
   const [pending, setPending] = useState<{ start: string | null; end: string | null }>({ start: null, end: null });
   const [applied, setApplied] = useState({ start: '2026-03-03', end: '2026-03-14' });
   const [hover, setHover] = useState<string | null>(null);
@@ -381,7 +389,7 @@ export function PickerPanelMonthOnly({ missingDates }: { missingDates?: Set<stri
   const displayEnd = pending.end || (pending.start ? null : applied.end);
 
   return (
-    <div style={panelStyle}>
+    <div style={panelStyle(theme)}>
       <PickerHeader rangeStart={displayStart} rangeEnd={displayEnd} />
       <CalendarMonth initYear={2026} initMonth={2} rangeStart={displayStart} rangeEnd={displayEnd} hoverDate={hover} onDayClick={selectDate} onDayHover={setHover} missingDates={missingDates} />
       <Footer>
@@ -405,7 +413,7 @@ const PRESETS = [
   { label: 'YTD',          start: '2026-01-01', end: '2026-04-29' },
 ] as const;
 
-export function PickerPanelWithPresets({ showIndicator = true, missingDates }: { showIndicator?: boolean; missingDates?: Set<string> }) {
+export function PickerPanelWithPresets({ showIndicator = true, missingDates, theme = 'grey' }: { showIndicator?: boolean; missingDates?: Set<string>; theme?: 'tonal' | 'grey' }) {
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [applied, setApplied] = useState({ start: '2026-03-03', end: '2026-03-14' });
   const [pending, setPending] = useState<{ start: string | null; end: string | null }>({ start: null, end: null });
@@ -429,7 +437,7 @@ export function PickerPanelWithPresets({ showIndicator = true, missingDates }: {
   const displayEnd = pending.end || (pending.start ? null : applied.end);
 
   return (
-    <div style={panelStyle}>
+    <div style={panelStyle(theme)}>
       <PickerHeader rangeStart={displayStart} rangeEnd={displayEnd} showIndicator={showIndicator} />
       <div style={{ display: 'flex', height: 300 }}>
         <div style={{ width: 208, display: 'flex', flexDirection: 'column', padding: '8px 0', flexShrink: 0 }}>
@@ -460,7 +468,7 @@ export function PickerPanelWithPresets({ showIndicator = true, missingDates }: {
 const PERIOD_MONTHS = ['Jan 1-31','Feb 1-28','Mar 1-31','Apr 1-30','May 1-31','Jun 1-30','Jul 1-31','Aug 1-31','Sep 1-30','Oct 1-31','Nov 1-30','Dec 1-31'];
 const PERIOD_YEARS = ['2026','2025','2024','2023'];
 
-export function PickerPanelPeriod({ onSwitchToCustom, showIndicator = true }: { onSwitchToCustom?: () => void; showIndicator?: boolean }) {
+export function PickerPanelPeriod({ onSwitchToCustom, showIndicator = true, theme = 'grey' }: { onSwitchToCustom?: () => void; showIndicator?: boolean; theme?: 'tonal' | 'grey' }) {
   const [selectedMonth, setSelectedMonth] = useState('Mar 1-31');
   const [selectedYear, setSelectedYear] = useState('2026');
   const [applied, setApplied] = useState({ month: 'Mar 1-31', year: '2026' });
@@ -468,7 +476,7 @@ export function PickerPanelPeriod({ onSwitchToCustom, showIndicator = true }: { 
   const apply = () => setApplied({ month: selectedMonth, year: selectedYear });
 
   return (
-    <div style={panelStyle}>
+    <div style={panelStyle(theme)}>
       <PickerHeader label={`${applied.month} ${applied.year}`} showIndicator={showIndicator} />
       <div style={{ display: 'flex', height: 340, overflow: 'hidden' }}>
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
@@ -508,7 +516,7 @@ export function PickerPanelPeriod({ onSwitchToCustom, showIndicator = true }: { 
 }
 
 // ── picker.trigger ────────────────────────────────────────────────────────────
-type TriggerType = 'calendar' | 'location';
+type TriggerType = 'calendar' | 'period';
 type TriggerMode = 'with-label' | 'icon-only';
 
 interface PickerTriggerProps {
@@ -517,20 +525,20 @@ interface PickerTriggerProps {
   value?: string;
   active?: boolean;
   filterCount?: number | null;
+  theme?: 'tonal' | 'grey';
 }
 
-export function PickerTrigger({ type = 'calendar', mode = 'with-label', value, active = false, filterCount = null }: PickerTriggerProps) {
-  const label = type === 'calendar' ? 'Mar 3 – Mar 14, 2026' : 'All locations';
+export function PickerTrigger({ type = 'calendar', mode = 'with-label', value, active = false, filterCount = null, theme = 'tonal' }: PickerTriggerProps) {
+  const label = 'Mar 3 – Mar 14, 2026';
   const displayValue = value ?? label;
+  const bg = active ? TRIGGER_BG[theme].filled : TRIGGER_BG[theme].rest;
 
-  const iconPath = type === 'calendar'
-    ? <><rect x="2" y="3" width="12" height="11" rx="2" stroke="currentColor" strokeWidth="1.3"/><path d="M2 7H14" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/><path d="M5 2V4M11 2V4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></>
-    : <><path d="M8 8.5C9.1 8.5 10 7.6 10 6.5S9.1 4.5 8 4.5 6 5.4 6 6.5 6.9 8.5 8 8.5z" stroke="currentColor" strokeWidth="1.3"/><path d="M8 2C5.8 2 4 3.8 4 6c0 3 4 8 4 8s4-5 4-8c0-2.2-1.8-4-4-4z" stroke="currentColor" strokeWidth="1.3"/></>;
+  const iconPath = <><rect x="2" y="3" width="12" height="11" rx="2" stroke="currentColor" strokeWidth="1.3"/><path d="M2 7H14" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/><path d="M5 2V4M11 2V4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></>;
 
   return (
     <button style={{
       display: 'inline-flex', alignItems: 'center', gap: 8, height: 36, padding: '0 12px',
-      background: active ? T.surfacePurp : T.bg, border: `1px solid ${T.border}`, borderRadius: 8,
+      background: bg, border: `1px solid ${T.border}`, borderRadius: 8,
       cursor: 'pointer', fontSize: 13, color: T.textSec, fontFamily: 'Inter, sans-serif', whiteSpace: 'nowrap',
     }}>
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">{iconPath}</svg>
