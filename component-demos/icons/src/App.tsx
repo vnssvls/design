@@ -17,34 +17,42 @@ function SvgIcon({ svg, size, color }: { svg: string; size: number; color: strin
   );
 }
 
-function IconCard({ icon, size }: { icon: IconDef; size: number }) {
-  const [copied, setCopied] = useState(false);
+type CopyMode = 'svg' | 'path' | null;
 
-  const copy = (text: string) => {
+function IconCard({ icon, size }: { icon: IconDef; size: number }) {
+  const [copied, setCopied] = useState<CopyMode>(null);
+
+  const copy = (text: string, mode: CopyMode) => {
     navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1200);
+    setCopied(mode);
+    setTimeout(() => setCopied(null), 1400);
   };
+
+  const copySvg = () => copy(icon.svg, 'svg');
+  const copyPath = () => copy(icon.path, 'path');
+
+  const label = copied === 'svg' ? 'SVG copied!' : copied === 'path' ? 'path copied!' : icon.path;
+  const labelColor = copied ? PURPLE : TEXT_MUTED;
 
   return (
     <div
       style={{
         background: SURFACE,
-        border: `1px solid ${BORDER}`,
+        border: `1px solid ${copied ? PURPLE : BORDER}`,
         borderRadius: 12,
         padding: '16px 12px 12px',
         display: 'flex',
         flexDirection: 'column',
         gap: 12,
-        cursor: 'default',
+        transition: 'border-color 0.15s',
       }}
     >
-      {/* color swatches row */}
+      {/* color swatches — click to copy SVG */}
       <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
         {SEMANTIC_COLORS.map((c) => (
           <div
             key={c.label}
-            title={`${c.label} — ${c.token}\n${c.value}`}
+            title={`Click to copy SVG\n${c.label} — ${c.token} (${c.value})`}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -56,32 +64,38 @@ function IconCard({ icon, size }: { icon: IconDef; size: number }) {
               background: BG,
               cursor: 'pointer',
             }}
-            onClick={() => copy(icon.path)}
+            onClick={copySvg}
           >
             <SvgIcon svg={icon.svg} size={size} color={c.value} />
           </div>
         ))}
       </div>
 
-      {/* name + path */}
+      {/* name */}
       <div style={{ textAlign: 'center' }}>
-        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, fontWeight: 600, color: TEXT_PRIMARY, letterSpacing: '0.3px' }}>
+        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, fontWeight: 600, color: TEXT_PRIMARY, letterSpacing: '0.3px', marginBottom: 4 }}>
           {icon.name}
         </div>
+        {/* path — click to copy file path */}
         <div
           style={{
             fontFamily: 'Inter, sans-serif',
             fontSize: 10,
-            color: copied ? PURPLE : TEXT_MUTED,
-            marginTop: 2,
+            color: labelColor,
             cursor: 'pointer',
             transition: 'color 0.15s',
           }}
-          onClick={() => copy(icon.path)}
-          title="Click to copy path"
+          onClick={copyPath}
+          title="Click to copy file path"
         >
-          {copied ? 'copied!' : icon.path}
+          {label}
         </div>
+        {/* copy SVG hint */}
+        {!copied && (
+          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 9, color: 'rgba(255,255,255,0.2)', marginTop: 2 }}>
+            click icon to copy SVG
+          </div>
+        )}
       </div>
     </div>
   );
@@ -99,7 +113,8 @@ export default function App() {
         </div>
         <h1 style={{ fontSize: 28, fontWeight: 600, marginBottom: 4 }}>Icons</h1>
         <p style={{ fontSize: 13, color: TEXT_MUTED, marginBottom: 32 }}>
-          All icons use <code style={{ background: 'rgba(255,255,255,0.08)', padding: '1px 5px', borderRadius: 4, fontSize: 12 }}>currentColor</code> — apply token color at implementation. Click any path to copy.
+          All icons use <code style={{ background: 'rgba(255,255,255,0.08)', padding: '1px 5px', borderRadius: 4, fontSize: 12 }}>currentColor</code> — apply token color at implementation.
+          Click an icon swatch to copy the raw SVG. Click the path label to copy the file path.
         </p>
 
         {/* size selector */}
