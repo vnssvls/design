@@ -296,21 +296,15 @@ const vDividerStyle: React.CSSProperties = { width: 1, background: T.border, fle
 const hDividerStyle: React.CSSProperties = { height: 1, background: T.border, flexShrink: 0 };
 
 function FooterBtn({ children, onClick, disabled, variant = 'ghost' }: {
-  children: React.ReactNode; onClick?: () => void; disabled?: boolean; variant?: 'ghost' | 'primary' | 'link';
+  children: React.ReactNode; onClick?: () => void; disabled?: boolean; variant?: 'ghost' | 'white';
 }) {
-  if (variant === 'link') {
-    return (
-      <button onClick={onClick} style={{ background: 'none', border: 'none', fontSize: 13, fontWeight: 500, color: T.primary, cursor: 'pointer', padding: 0, fontFamily: 'Inter, sans-serif' }}>
-        {children}
-      </button>
-    );
-  }
-  const isPrimary = variant === 'primary';
+  const isWhite = variant === 'white';
   return (
     <button onClick={onClick} disabled={disabled} style={{
-      padding: '0 16px', height: 30, fontSize: 13, fontWeight: isPrimary ? 600 : 500,
-      color: isPrimary ? T.primaryDark : T.textSec, background: isPrimary ? T.primary : 'transparent',
-      border: isPrimary ? 'none' : `1px solid ${T.borderMed}`, borderRadius: 8, cursor: disabled ? 'not-allowed' : 'pointer',
+      padding: '0 16px', height: 30, fontSize: 13, fontWeight: isWhite ? 600 : 500,
+      color: isWhite ? '#0A0A0F' : T.textPrimary,
+      background: isWhite ? '#FCFBFB' : 'transparent',
+      border: 'none', borderRadius: 8, cursor: disabled ? 'not-allowed' : 'pointer',
       opacity: disabled ? 0.35 : 1, fontFamily: 'Inter, sans-serif',
     }}>
       {children}
@@ -364,7 +358,7 @@ export function PickerPanelCustomRange({ showIndicator = true, missingDates, the
         <FooterBtn onClick={reset}>Reset</FooterBtn>
         <FooterActions>
           <FooterBtn onClick={reset}>Cancel</FooterBtn>
-          <FooterBtn variant="primary" onClick={apply} disabled={!(rangeStart && rangeEnd)}>Apply</FooterBtn>
+          <FooterBtn variant="white" onClick={apply} disabled={!(rangeStart && rangeEnd)}>Apply</FooterBtn>
         </FooterActions>
       </Footer>
     </div>
@@ -395,7 +389,7 @@ export function PickerPanelMonthOnly({ missingDates, theme = 'grey' }: { missing
       <Footer>
         <FooterActions>
           <FooterBtn onClick={cancel}>Cancel</FooterBtn>
-          <FooterBtn variant="primary" onClick={apply} disabled={!(pending.start && pending.end)}>Apply</FooterBtn>
+          <FooterBtn variant="white" onClick={apply} disabled={!(pending.start && pending.end)}>Apply</FooterBtn>
         </FooterActions>
       </Footer>
     </div>
@@ -457,7 +451,7 @@ export function PickerPanelWithPresets({ showIndicator = true, missingDates, the
       <Footer>
         <FooterActions>
           <FooterBtn onClick={cancel}>Cancel</FooterBtn>
-          <FooterBtn variant="primary" onClick={apply} disabled={!(pending.start && pending.end) && !activePreset}>Apply</FooterBtn>
+          <FooterBtn variant="white" onClick={apply} disabled={!(pending.start && pending.end) && !activePreset}>Apply</FooterBtn>
         </FooterActions>
       </Footer>
     </div>
@@ -505,10 +499,10 @@ export function PickerPanelPeriod({ onSwitchToCustom, showIndicator = true, them
       </div>
       <div style={hDividerStyle} />
       <Footer>
-        <FooterBtn variant="link" onClick={onSwitchToCustom}>Custom range</FooterBtn>
+        <FooterBtn onClick={onSwitchToCustom}>Custom range</FooterBtn>
         <FooterActions>
           <FooterBtn>Cancel</FooterBtn>
-          <FooterBtn variant="primary" onClick={apply}>Apply</FooterBtn>
+          <FooterBtn variant="white" onClick={apply}>Apply</FooterBtn>
         </FooterActions>
       </Footer>
     </div>
