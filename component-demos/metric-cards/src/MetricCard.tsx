@@ -40,7 +40,8 @@ const PURPLE  = '#BB86FC';
 const WARNING = '#FF863B';
 const DANGER  = '#BA4C4E';
 const SUCCESS = '#6BC497';
-const LABEL_COLOR = '#CACACA';
+const LABEL_COLOR     = '#B0B0B8';
+const MUTED_COLOR     = '#B0B0B8';
 
 const PLAYGROUND_DEFAULT_BG  = '#212121';
 const PLAYGROUND_SCENARIO_BG = '#4B4B4B';
@@ -279,19 +280,35 @@ export function MetricCard({
 //   Scenario: delta text (+x%) in SUCCESS color · one Reset button below all cards
 //   bg: default/null → #212121 · scenario → #4B4B4B
 
+// icon-trend-up — from Figma nav arrows library (direction=icon-trend-up, medium-20x20)
 function IconTrendUp({ color, size = 20 }: { color: string; size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
-      <path d="M4 12L12 4M12 4H6M12 4V10" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none">
+      <path d="M18.7501 4.37508V9.37508C18.7501 9.54084 18.6842 9.69981 18.567 9.81702C18.4498 9.93423 18.2908 10.0001 18.1251 10.0001C17.9593 10.0001 17.8003 9.93423 17.6831 9.81702C17.5659 9.69981 17.5001 9.54084 17.5001 9.37508V5.88368L11.0672 12.3173C11.0092 12.3754 10.9403 12.4215 10.8644 12.4529C10.7885 12.4844 10.7072 12.5006 10.6251 12.5006C10.5429 12.5006 10.4616 12.4844 10.3857 12.4529C10.3099 12.4215 10.2409 12.3754 10.1829 12.3173L7.50006 9.63367L2.31725 14.8173C2.19997 14.9345 2.04092 15.0004 1.87506 15.0004C1.70921 15.0004 1.55015 14.9345 1.43288 14.8173C1.3156 14.7 1.24972 14.5409 1.24972 14.3751C1.24972 14.2092 1.3156 14.0502 1.43288 13.9329L7.05787 8.30789C7.11592 8.24978 7.18485 8.20368 7.26072 8.17223C7.3366 8.14078 7.41793 8.12459 7.50006 8.12459C7.5822 8.12459 7.66353 8.14078 7.7394 8.17223C7.81527 8.20368 7.8842 8.24978 7.94225 8.30789L10.6251 10.9915L16.6165 5.00008H13.1251C12.9593 5.00008 12.8003 4.93423 12.6831 4.81702C12.5659 4.69981 12.5001 4.54084 12.5001 4.37508C12.5001 4.20932 12.5659 4.05035 12.6831 3.93314C12.8003 3.81593 12.9593 3.75008 13.1251 3.75008H18.1251C18.2908 3.75008 18.4498 3.81593 18.567 3.93314C18.6842 4.05035 18.7501 4.20932 18.7501 4.37508Z" fill={color}/>
     </svg>
   );
 }
 
-const PLAYGROUND_LABELS = {
-  revenue: 'Revenue',
-  cogs:    'Theoretical COGS',
-  profit:  'Gross Profit',
-};
+// icon-euro — Gross Profit icon (euro-in-circle, stroke-based, from Figma node 1643:2302)
+function IconEuro({ color, size = 17 }: { color: string; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 17 17" fill="none">
+      <path d="M9.94647 4.53487C9.38095 4.3355 8.77585 4.27466 8.18196 4.35744C7.58806 4.44023 7.02267 4.66423 6.53323 5.01065C6.04378 5.35708 5.64455 5.81582 5.36901 6.34841C5.09348 6.881 4.94968 7.47189 4.94968 8.07153C4.94968 8.67117 5.09348 9.26207 5.36901 9.79466C5.64455 10.3272 6.04378 10.786 6.53323 11.1324C7.02267 11.4788 7.58806 11.7028 8.18196 11.7856C8.77585 11.8684 9.38095 11.8076 9.94647 11.6082M4.32147 6.82153H8.69647M4.32147 9.32153H8.69647M15.5715 8.07153C15.5715 9.05645 15.3775 10.0317 15.0006 10.9417C14.6237 11.8516 14.0712 12.6784 13.3748 13.3748C12.6783 14.0713 11.8515 14.6237 10.9416 15.0006C10.0317 15.3775 9.05639 15.5715 8.07147 15.5715C7.08656 15.5715 6.11129 15.3775 5.20135 15.0006C4.2914 14.6237 3.46461 14.0713 2.76817 13.3748C2.07173 12.6784 1.51929 11.8516 1.14238 10.9417C0.765465 10.0317 0.571472 9.05645 0.571472 8.07153C0.571472 6.08241 1.36165 4.17476 2.76817 2.76823C4.17469 1.36171 6.08235 0.571533 8.07147 0.571533C10.0606 0.571533 11.9682 1.36171 13.3748 2.76823C14.7813 4.17476 15.5715 6.08241 15.5715 8.07153Z" stroke={color} strokeWidth="1.14297" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+// ─── Playground card data ─────────────────────────────────────────────────────
+
+interface PGCard {
+  key:        string;
+  label:      string;
+  value:      string;
+  icon:       React.ReactNode;
+  delta:      string;
+  was:        string;
+  deltaColor: string;
+}
 
 export function MetricCardPlayground({
   state         = 'default',
@@ -303,64 +320,67 @@ export function MetricCardPlayground({
   const isNull     = state === 'null';
   const isScenario = state === 'scenario';
 
-  const bg = isScenario ? PLAYGROUND_SCENARIO_BG : PLAYGROUND_DEFAULT_BG;
-
+  const cardBg = isScenario ? PLAYGROUND_SCENARIO_BG : PLAYGROUND_DEFAULT_BG;
   const nullIcon = 'rgba(255,255,255,0.25)';
 
-  const cards = [
+  const cards: PGCard[] = [
     {
-      key:   'revenue',
-      label: PLAYGROUND_LABELS.revenue,
-      value: isNull ? '—' : revenueValue,
-      icon:  <IconTrendUp color={isNull ? nullIcon : SUCCESS} size={20} />,
-      delta: '+€3,200',
+      key:        'revenue',
+      label:      'Revenue (Incl)',
+      value:      isNull ? '—' : revenueValue,
+      icon:       <IconTrendUp color={isNull ? nullIcon : SUCCESS} size={20} />,
+      delta:      '↑ kr 10,150 (0,7%)',
+      was:        `was ${revenueValue}`,
       deltaColor: SUCCESS,
     },
     {
-      key:   'cogs',
-      label: PLAYGROUND_LABELS.cogs,
-      value: isNull ? '—' : cogsValue,
-      icon:  <IconCOGS color={isNull ? nullIcon : PURPLE} size={20} />,
-      delta: '-1.2%',
-      deltaColor: SUCCESS,
+      key:        'cogs',
+      label:      'Theoretical COGS',
+      value:      isNull ? '—' : cogsValue,
+      icon:       <IconCOGS color={isNull ? nullIcon : PURPLE} size={17} />,
+      delta:      '↓ 0,2 pp (0,7%)',
+      was:        `was ${cogsValue}`,
+      deltaColor: PURPLE,
     },
     {
-      key:   'profit',
-      label: PLAYGROUND_LABELS.profit,
-      value: isNull ? '—' : profitValue,
-      icon:  <IconCOGS color={isNull ? nullIcon : SUCCESS} size={20} />,
-      delta: '+€4,100',
-      deltaColor: SUCCESS,
+      key:        'profit',
+      label:      'Gross Profit',
+      value:      isNull ? '—' : profitValue,
+      icon:       <IconEuro color={isNull ? nullIcon : PURPLE} size={17} />,
+      delta:      '↑ kr 8,120 (0,9 %)',
+      was:        `was ${profitValue}`,
+      deltaColor: PURPLE,
     },
   ];
 
+  // Scenario card is wider to accommodate the delta section
+  const cardW = isScenario ? 323 : 245;
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontFamily: 'Inter, sans-serif' }}>
-      {/* Card row */}
-      <div style={{ display: 'flex', gap: 8 }}>
-        {cards.map(card => (
-          <div
-            key={card.key}
-            style={{
-              background: bg,
-              border: `1px solid rgba(255,255,255,0.07)`,
-              borderRadius: 10,
-              padding: '12px 16px',
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 10,
-              flexShrink: 0,
-              boxSizing: 'border-box' as const,
-              minWidth: 155,
-            }}
-          >
-            {/* Icon container — 32×32 */}
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: 'Inter, sans-serif' }}>
+      {cards.map(card => (
+        <div
+          key={card.key}
+          style={{
+            width: cardW,
+            background: cardBg,
+            border: `1px solid rgba(255,255,255,0.07)`,
+            borderRadius: 10,
+            padding: '12px 16px',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 10,
+            flexShrink: 0,
+            boxSizing: 'border-box' as const,
+          }}
+        >
+          {/* main.values: icon + info */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+            {/* icon.container — 32×32, no background */}
             <div style={{
               width: 32,
               height: 32,
-              borderRadius: 8,
-              background: 'rgba(255,255,255,0.06)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -369,64 +389,95 @@ export function MetricCardPlayground({
               {card.icon}
             </div>
 
-            {/* Value + label */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{
-                  fontSize: 16,
-                  fontWeight: 600,
-                  color: isNull ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.88)',
-                  letterSpacing: '-0.01em',
-                  lineHeight: 1,
-                }}>
-                  {card.value}
-                </span>
-                {isScenario && (
-                  <span style={{
-                    fontSize: 11,
-                    fontWeight: 500,
-                    color: card.deltaColor,
-                    lineHeight: 1,
-                  }}>
-                    {card.delta}
-                  </span>
-                )}
-              </div>
+            {/* info: value + label */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <span style={{
+                fontSize: 16,
+                fontWeight: 600,
+                color: isNull ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.88)',
+                letterSpacing: '-0.01em',
+                lineHeight: '19px',
+                whiteSpace: 'nowrap' as const,
+              }}>
+                {card.value}
+              </span>
               <span style={{
                 fontSize: 11,
                 fontWeight: 400,
-                color: LABEL_COLOR,
+                color: MUTED_COLOR,
+                lineHeight: '15px',
                 whiteSpace: 'nowrap' as const,
-                lineHeight: 1,
               }}>
                 {card.label}
               </span>
             </div>
           </div>
-        ))}
-      </div>
 
-      {/* Reset — shown in scenario state only, sits below cards */}
-      {isScenario && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <button
-            onClick={onReset}
-            style={{
-              height: 24,
-              padding: '0 12px',
-              borderRadius: 40,
-              background: 'rgba(255,255,255,0.12)',
-              border: '1px solid rgba(255,255,255,0.16)',
-              color: 'rgba(255,255,255,0.7)',
-              fontSize: 11,
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 500,
-              cursor: 'pointer',
-            }}
-          >
-            Reset
-          </button>
+          {/* scenario.frame: divider + delta/was — scenario only */}
+          {isScenario && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 14,
+              paddingTop: 2,
+              paddingBottom: 2,
+              paddingRight: 12,
+              flex: 1,
+            }}>
+              {/* divider — 1×32 */}
+              <div style={{
+                width: 1,
+                height: 32,
+                background: 'rgba(255,255,255,0.1)',
+                flexShrink: 0,
+              }} />
+              {/* delta + was */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <span style={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: card.deltaColor,
+                  lineHeight: '15px',
+                  whiteSpace: 'nowrap' as const,
+                }}>
+                  {card.delta}
+                </span>
+                <span style={{
+                  fontSize: 11,
+                  fontWeight: 400,
+                  color: MUTED_COLOR,
+                  lineHeight: '13px',
+                  whiteSpace: 'nowrap' as const,
+                }}>
+                  {card.was}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
+      ))}
+
+      {/* Reset — same row as cards, scenario only */}
+      {isScenario && (
+        <button
+          onClick={onReset}
+          style={{
+            height: 23,
+            padding: '4px 8px',
+            borderRadius: 6,
+            background: '#707070',
+            border: 'none',
+            color: 'rgba(255,255,255,0.8)',
+            fontSize: 11,
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 500,
+            cursor: 'pointer',
+            flexShrink: 0,
+            whiteSpace: 'nowrap' as const,
+          }}
+        >
+          Reset
+        </button>
       )}
     </div>
   );

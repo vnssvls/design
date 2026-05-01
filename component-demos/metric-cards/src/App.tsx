@@ -296,7 +296,8 @@ export default function App() {
                   background: '#212121',
                   padding: '16px',
                   borderRadius: 8,
-                  display: 'inline-flex',
+                  display: 'flex',
+                  overflow: 'auto',
                 }}>
                   <MetricCardPlayground
                     state={s}
