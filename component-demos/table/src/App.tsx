@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   T,
   Density, Theme, RowState, Sentiment, SortDir, StatusDisplay, HealthSentiment, ActionType,
@@ -77,30 +77,30 @@ function Divider() {
 
 // ─── Column definitions ───────────────────────────────────────────────────────
 //
-// These are example column sets for the live table demo.
-// In your implementation, define columns to match your data model.
+// sortable: true = clicking the header cycles none → asc → desc → none
+// resizable: true = drag handle appears at right edge of header cell
 
 interface ColDef {
   key: string;
   label: string;
   width: number;
   align: 'left' | 'center';
-  sort: SortDir;
+  sortable?: boolean;
+  resizable?: boolean;
 }
 
 const COLS_DESKTOP: ColDef[] = [
-  { key: 'name',     label: 'Name',     width: 220, align: 'left',   sort: 'none' },
-  { key: 'value',    label: 'Value',    width: 100, align: 'left',   sort: 'asc'  },
-  { key: 'category', label: 'Category', width: 120, align: 'left',   sort: 'none' },
-  { key: 'status',   label: 'Status',   width: 160, align: 'left',   sort: 'none' },
-  { key: 'health',   label: 'Health',   width: 90,  align: 'center', sort: 'none' },
-  { key: 'action',   label: '',         width: 72,  align: 'center', sort: 'none' },
+  { key: 'name',     label: 'Name',     width: 220, align: 'left',   sortable: true,  resizable: true  },
+  { key: 'value',    label: 'Value',    width: 100, align: 'left',   sortable: true,  resizable: true  },
+  { key: 'category', label: 'Category', width: 120, align: 'left',   sortable: false, resizable: true  },
+  { key: 'status',   label: 'Status',   width: 160, align: 'left',   sortable: false, resizable: true  },
+  { key: 'health',   label: 'Health',   width: 90,  align: 'center', sortable: false, resizable: false },
+  { key: 'action',   label: '',         width: 72,  align: 'center', sortable: false, resizable: false },
 ];
 
-// Tablet drops the Category column
-const COLS_TABLET: ColDef[] = COLS_DESKTOP.filter(c => c.key !== 'category').map(c =>
-  c.key === 'name' ? { ...c, width: 200 } : c
-);
+const COLS_TABLET: ColDef[] = COLS_DESKTOP
+  .filter(c => c.key !== 'category')
+  .map(c => c.key === 'name' ? { ...c, width: 200 } : c);
 
 // ─── Demo data ────────────────────────────────────────────────────────────────
 
@@ -108,6 +108,7 @@ interface RowData {
   id: number;
   name: string;
   value: string;
+  valueSortKey: number;
   sentiment: Sentiment;
   category: string;
   status: StatusDisplay;
@@ -117,20 +118,45 @@ interface RowData {
 }
 
 const DATA_ROWS: RowData[] = [
-  { id: 1, name: 'Alpha Studio',   value: '22.5%', sentiment: 'positive', category: 'Type A', status: 'complete',    progress: 100, health: 'good',    action: 'download' },
-  { id: 2, name: 'Beta Works',     value: '18.2%', sentiment: 'warning',  category: 'Type B', status: 'in-progress', progress: 65,  health: 'warning', action: 'view'     },
-  { id: 3, name: 'Gamma Co',       value: '-4.1%', sentiment: 'negative', category: 'Type A', status: 'in-progress', progress: 0,   health: 'bad',     action: 'download' },
-  { id: 4, name: 'Delta Lab',      value: '31.0%', sentiment: 'positive', category: 'Type C', status: 'complete',    progress: 100, health: 'good',    action: 'open'     },
+  { id: 1, name: 'Alpha Studio', value: '22.5%', valueSortKey: 22.5, sentiment: 'positive', category: 'Type A', status: 'complete',    progress: 100, health: 'good',    action: 'download' },
+  { id: 2, name: 'Beta Works',   value: '18.2%', valueSortKey: 18.2, sentiment: 'warning',  category: 'Type B', status: 'in-progress', progress: 65,  health: 'warning', action: 'view'     },
+  { id: 3, name: 'Gamma Co',     value: '-4.1%', valueSortKey: -4.1, sentiment: 'negative', category: 'Type A', status: 'in-progress', progress: 0,   health: 'bad',     action: 'download' },
+  { id: 4, name: 'Delta Lab',    value: '31.0%', valueSortKey: 31.0, sentiment: 'positive', category: 'Type C', status: 'complete',    progress: 100, health: 'good',    action: 'open'     },
 ];
 
 const EMPTY_ROWS: RowData[] = [
-  { id: 5, name: 'Epsilon Ltd',    value: '',      sentiment: 'neutral',  category: 'Type B', status: 'empty', progress: 0, health: 'bad', action: 'view' },
-  { id: 6, name: 'Zeta Group',     value: '',      sentiment: 'neutral',  category: 'Type A', status: 'empty', progress: 0, health: 'bad', action: 'view' },
+  { id: 5, name: 'Epsilon Ltd',  value: '', valueSortKey: 0, sentiment: 'neutral', category: 'Type B', status: 'incomplete', progress: 0, health: 'bad', action: 'view' },
+  { id: 6, name: 'Zeta Group',   value: '', valueSortKey: 0, sentiment: 'neutral', category: 'Type A', status: 'incomplete', progress: 0, health: 'bad', action: 'view' },
 ];
+
+// ─── Sort helpers ─────────────────────────────────────────────────────────────
+
+function sortRows(rows: RowData[], key: string, dir: SortDir): RowData[] {
+  if (dir === 'none' || !key) return rows;
+  return [...rows].sort((a, b) => {
+    let va: string | number = key === 'value' ? (a as any).valueSortKey : (a as any)[key] ?? '';
+    let vb: string | number = key === 'value' ? (b as any).valueSortKey : (b as any)[key] ?? '';
+    const cmp = typeof va === 'number' && typeof vb === 'number'
+      ? va - vb
+      : String(va).localeCompare(String(vb));
+    return dir === 'asc' ? cmp : -cmp;
+  });
+}
 
 // ─── Table components ─────────────────────────────────────────────────────────
 
-function TableHeader({ cols, theme, density }: { cols: ColDef[]; theme: Theme; density: Density }) {
+function TableHeader({
+  cols, theme, density, sortKey, sortDir, onSort, resizable, onResizeStart,
+}: {
+  cols: ColDef[];
+  theme: Theme;
+  density: Density;
+  sortKey?: string | null;
+  sortDir?: SortDir;
+  onSort?: (key: string) => void;
+  resizable?: boolean;
+  onResizeStart?: (key: string, e: React.MouseEvent) => void;
+}) {
   const bg = theme === 'grey' ? T.surfaceGrey : T.headerTonal;
   const totalWidth = cols.reduce((s, c) => s + c.width, 0);
   return (
@@ -143,10 +169,16 @@ function TableHeader({ cols, theme, density }: { cols: ColDef[]; theme: Theme; d
         <HeaderCell
           key={col.key}
           label={col.label}
-          sort={col.sort}
+          sort={col.key === sortKey ? (sortDir ?? 'none') : 'none'}
           align={col.align}
           width={col.width}
           density={density}
+          onSort={col.sortable ? () => onSort?.(col.key) : undefined}
+          onResizeStart={
+            resizable && col.resizable && onResizeStart
+              ? (e) => onResizeStart(col.key, e)
+              : undefined
+          }
         />
       ))}
     </div>
@@ -184,19 +216,66 @@ function TableDataRow({
 
 export default function App() {
   // Live table controls
-  const [theme,        setTheme]        = useState<Theme>('tonal');
-  const [density,      setDensity]      = useState<Density>('desktop');
-  const [showEmpty,    setShowEmpty]    = useState(true);
-  const [sectionOpen,  setSectionOpen]  = useState(true);
-  const [rowStates,    setRowStates]    = useState<Record<number, RowState>>({ 1: 'default', 2: 'default', 3: 'default', 4: 'default' });
+  const [theme,       setTheme]       = useState<Theme>('tonal');
+  const [density,     setDensity]     = useState<Density>('desktop');
+  const [showEmpty,   setShowEmpty]   = useState(true);
+  const [sectionOpen, setSectionOpen] = useState(true);
+  const [rowStates,   setRowStates]   = useState<Record<number, RowState>>(
+    { 1: 'default', 2: 'default', 3: 'default', 4: 'default' }
+  );
+
+  // Sort
+  const [sortKey, setSortKey] = useState<string | null>(null);
+  const [sortDir, setSortDir] = useState<SortDir>('none');
+
+  // Resizable columns
+  const [resizable,  setResizable]  = useState(false);
+  const [colWidths,  setColWidths]  = useState<Record<string, number>>(
+    Object.fromEntries(COLS_DESKTOP.map(c => [c.key, c.width]))
+  );
+  const dragRef = useRef<{ key: string; startX: number; startWidth: number } | null>(null);
 
   // Cell section controls
   const [cellDensity,  setCellDensity]  = useState<Density>('desktop');
   const [testProgress, setTestProgress] = useState(65);
 
-  const cols = density === 'tablet' ? COLS_TABLET : COLS_DESKTOP;
+  // Derive cols with dynamic widths
+  const baseCols = density === 'tablet' ? COLS_TABLET : COLS_DESKTOP;
+  const cols = baseCols.map(c => ({ ...c, width: colWidths[c.key] ?? c.width }));
   const tableWidth = cols.reduce((s, c) => s + c.width, 0);
   const tableBg = theme === 'grey' ? T.surfaceGrey : T.headerTonal;
+
+  function handleSort(key: string) {
+    if (sortKey !== key) {
+      setSortKey(key);
+      setSortDir('asc');
+    } else {
+      const next: SortDir = sortDir === 'asc' ? 'desc' : sortDir === 'desc' ? 'none' : 'asc';
+      setSortDir(next);
+      if (next === 'none') setSortKey(null);
+    }
+  }
+
+  function handleResizeStart(key: string, e: React.MouseEvent) {
+    e.preventDefault();
+    const startWidth = colWidths[key] ?? 100;
+    dragRef.current = { key, startX: e.clientX, startWidth };
+
+    function onMove(ev: MouseEvent) {
+      if (!dragRef.current) return;
+      const newWidth = Math.max(60, dragRef.current.startWidth + ev.clientX - dragRef.current.startX);
+      setColWidths(prev => ({ ...prev, [dragRef.current!.key]: newWidth }));
+    }
+
+    function onUp() {
+      dragRef.current = null;
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    }
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }
 
   function cycleRowState(id: number) {
     const order: RowState[] = ['default', 'hover', 'selected', 'loading', 'empty'];
@@ -207,10 +286,11 @@ export default function App() {
     });
   }
 
+  const sortedData = sortRows(DATA_ROWS, sortKey ?? '', sortDir);
+
   return (
     <div style={{ background: T.bg, minHeight: '100vh', padding: '40px 40px 80px', fontFamily: 'Inter, sans-serif' }}>
 
-      {/* Shimmer animation */}
       <style>{`
         @keyframes shimmer {
           0%   { opacity: 0.5; }
@@ -231,10 +311,9 @@ export default function App() {
         {/* ══════ LIVE TABLE ══════ */}
         <H2>Live table</H2>
         <p style={{ color: T.white60, fontSize: 13, marginBottom: 24, fontFamily: 'Inter, sans-serif', marginTop: -8 }}>
-          Click a row to cycle its state. All controls apply to the whole table.
+          Click a row to cycle its state. Click a sortable column header to sort. Enable resizable to drag column widths.
         </p>
 
-        {/* Controls */}
         <Card style={{ marginBottom: 16 }}>
           <SectionLabel>Controls</SectionLabel>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -256,22 +335,53 @@ export default function App() {
                 section {sectionOpen ? 'expanded' : 'collapsed'}
               </ToggleBtn>
             </ControlRow>
+            <ControlRow label="resizable">
+              <ToggleBtn active={resizable} onClick={() => setResizable(v => !v)}>
+                {resizable ? 'on' : 'off'}
+              </ToggleBtn>
+              {resizable && (
+                <button
+                  onClick={() => setColWidths(Object.fromEntries(COLS_DESKTOP.map(c => [c.key, c.width])))}
+                  style={{
+                    padding: '5px 12px', borderRadius: 6, border: `1px solid ${T.rowDivider}`,
+                    background: 'transparent', color: T.white30,
+                    fontSize: 12, fontFamily: 'Inter, sans-serif', cursor: 'pointer',
+                  }}
+                >
+                  reset widths
+                </button>
+              )}
+            </ControlRow>
             <ControlRow label="row states">
               <span style={{ fontSize: 12, color: T.white30, fontFamily: 'Inter, sans-serif' }}>
-                Click any row below to cycle: default → hover → selected → loading → empty
+                Click any data row to cycle: default → hover → selected → loading → empty
               </span>
             </ControlRow>
           </div>
         </Card>
 
-        {/* Table preview */}
+        {resizable && (
+          <p style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif', marginBottom: 8, marginTop: -8 }}>
+            Drag the handle at the right edge of Name, Value, Category, or Status headers to resize. Min width 60px.
+          </p>
+        )}
+
         <div style={{
           background: tableBg, borderRadius: 12,
           border: `1px solid ${T.rowDivider}`,
           overflow: 'auto', marginBottom: 48,
         }}>
-          <TableHeader cols={cols} theme={theme} density={density} />
-          {DATA_ROWS.map(row => (
+          <TableHeader
+            cols={cols}
+            theme={theme}
+            density={density}
+            sortKey={sortKey}
+            sortDir={sortDir}
+            onSort={handleSort}
+            resizable={resizable}
+            onResizeStart={handleResizeStart}
+          />
+          {sortedData.map(row => (
             <TableDataRow
               key={row.id}
               row={row}
@@ -283,12 +393,13 @@ export default function App() {
           ))}
           {showEmpty && (
             <>
-              <RowDivider width={tableWidth} />
+              <RowDivider />
               <RowSectionDivider
-                label={`${EMPTY_ROWS.length} no data`}
+                label={`${EMPTY_ROWS.length} incomplete`}
                 expanded={sectionOpen}
                 density={density}
                 width={tableWidth}
+                showWarning={true}
                 onToggle={() => setSectionOpen(v => !v)}
               />
               {sectionOpen && EMPTY_ROWS.map(row => (
@@ -420,7 +531,7 @@ export default function App() {
         {/* ══════ HEADER CELL ══════ */}
         <H2>HeaderCell — sort × align × hover</H2>
         <p style={{ color: T.white60, fontSize: 13, marginBottom: 16, fontFamily: 'Inter, sans-serif', marginTop: -8 }}>
-          Hover any cell to see the state change.
+          Hover any cell to see the state change. Sortable columns show the sort icon on hover.
         </p>
 
         <Card style={{ marginBottom: 48 }}>
@@ -430,8 +541,8 @@ export default function App() {
                 <span style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif', minWidth: 56, padding: '0 16px', display: 'flex', alignItems: 'center' }}>
                   sort={sort}
                 </span>
-                <HeaderCell label="Column" sort={sort} align="left"   width={160} />
-                <HeaderCell label="Column" sort={sort} align="center" width={120} />
+                <HeaderCell label="Column" sort={sort} align="left"   width={160} onSort={() => {}} />
+                <HeaderCell label="Column" sort={sort} align="center" width={120} onSort={() => {}} />
               </div>
             ))}
           </div>
@@ -497,10 +608,10 @@ export default function App() {
           <Card>
             <SectionLabel>RowSectionDivider — expanded / collapsed</SectionLabel>
             <div style={{ background: T.headerTonal, borderRadius: 8, overflow: 'hidden' }}>
-              <RowSectionDivider label="3 no data" expanded={true}  density="desktop" width={440} />
-              <RowSectionDivider label="3 no data" expanded={false} density="desktop" width={440} />
-              <RowDivider width={440} />
-              <RowSectionDivider label="2 incomplete" expanded={true} density="tablet" width={440} />
+              <RowSectionDivider label="3 no data"    expanded={true}  density="desktop" width={440} />
+              <RowSectionDivider label="3 no data"    expanded={false} density="desktop" width={440} />
+              <RowDivider />
+              <RowSectionDivider label="2 incomplete" expanded={true}  density="tablet"  width={440} showWarning={true} />
             </div>
           </Card>
           <Card>
@@ -532,47 +643,42 @@ export default function App() {
         <Card>
           <SectionLabel>4-column custom table (RowBase composition)</SectionLabel>
 
-          {/* Custom table */}
           <div style={{
             background: T.headerTonal, borderRadius: 8, overflow: 'hidden',
             border: `1px solid ${T.rowDivider}`, marginBottom: 20,
           }}>
-            {/* Header */}
             <div style={{ display: 'flex', borderBottom: '0.5px solid rgba(255,255,255,0.1)' }}>
-              <HeaderCell label="Product"  sort="none" align="left"   width={240} />
-              <HeaderCell label="Price"    sort="asc"  align="left"   width={100} />
-              <HeaderCell label="Change"   sort="none" align="left"   width={120} />
-              <HeaderCell label=""         sort="none" align="center" width={72}  />
+              <HeaderCell label="Product" sort="none" align="left"   width={240} />
+              <HeaderCell label="Price"   sort="asc"  align="left"   width={100} onSort={() => {}} />
+              <HeaderCell label="Change"  sort="none" align="left"   width={120} onSort={() => {}} />
+              <HeaderCell label=""        sort="none" align="center" width={72}  />
             </div>
-
-            {/* Data rows — each is RowBase + cells dropped in */}
             <RowBase state="default" theme="tonal" density="desktop">
-              <CellText   value="Dark Roast Blend"   width={240} />
-              <CellMetric value="€12.40"  sentiment="neutral"  width={100} />
-              <CellMetric value="+3.2%"   sentiment="positive" width={120} />
-              <CellAction action="view"   width={72} />
+              <CellText   value="Dark Roast Blend" width={240} />
+              <CellMetric value="€12.40" sentiment="neutral"  width={100} />
+              <CellMetric value="+3.2%"  sentiment="positive" width={120} />
+              <CellAction action="view"  width={72} />
             </RowBase>
             <RowBase state="default" theme="tonal" density="desktop">
-              <CellText   value="House Red Wine"     width={240} />
-              <CellMetric value="€18.90"  sentiment="neutral"  width={100} />
-              <CellMetric value="-1.5%"   sentiment="negative" width={120} />
-              <CellAction action="view"   width={72} />
+              <CellText   value="House Red Wine"   width={240} />
+              <CellMetric value="€18.90" sentiment="neutral"  width={100} />
+              <CellMetric value="-1.5%"  sentiment="negative" width={120} />
+              <CellAction action="view"  width={72} />
             </RowBase>
             <RowBase state="selected" theme="tonal" density="desktop">
-              <CellText   value="Chicken Breast"     width={240} />
-              <CellMetric value="€8.20"   sentiment="neutral"  width={100} />
-              <CellMetric value="+12.1%"  sentiment="warning"  width={120} />
+              <CellText   value="Chicken Breast"   width={240} />
+              <CellMetric value="€8.20"  sentiment="neutral"  width={100} />
+              <CellMetric value="+12.1%" sentiment="warning"  width={120} />
               <CellAction action="download" width={72} />
             </RowBase>
             <RowBase state="default" theme="tonal" density="desktop">
-              <CellText   value="Fresh Basil"        width={240} />
-              <CellMetric value="€2.10"   sentiment="neutral"  width={100} />
-              <CellMetric value="+0.8%"   sentiment="positive" width={120} />
-              <CellAction action="view"   width={72} />
+              <CellText   value="Fresh Basil"      width={240} />
+              <CellMetric value="€2.10"  sentiment="neutral"  width={100} />
+              <CellMetric value="+0.8%"  sentiment="positive" width={120} />
+              <CellAction action="view"  width={72} />
             </RowBase>
           </div>
 
-          {/* Code snippet */}
           <div style={{
             background: '#0F0F12', borderRadius: 8, padding: 20,
             fontFamily: 'monospace', fontSize: 12, color: T.white60,
@@ -586,10 +692,13 @@ export default function App() {
   <CellAction action="view"              width={72}  />
 </RowBase>
 
-// Selected row — same API, RowBase handles the purple accent
-<RowBase state="selected" theme="tonal" density="desktop">
-  ...cells...
-</RowBase>
+// Sortable column header — onSort fires when the header is clicked
+<HeaderCell label="Price" sort="asc" align="left" width={100}
+  onSort={() => handleSort('price')} />
+
+// Resizable column header — onResizeStart enables the drag handle
+<HeaderCell label="Name" sort="none" align="left" width={220}
+  onResizeStart={(e) => handleResizeStart('name', e)} />
 
 // Loading row — pass column widths, RowBase renders skeletons
 <RowBase state="loading" theme="tonal" density="desktop"

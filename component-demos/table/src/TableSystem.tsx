@@ -3,43 +3,43 @@ import React, { useState } from 'react';
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 
 export const T = {
-  bg:                   '#0A0A0F',
-  surface:              '#181818',
-  surfaceGrey:          '#212121',
-  headerTonal:          '#0F0D14',
-  purple:               '#BB86FC',
-  success:              '#47B881',
-  warning:              '#FF863B',
-  danger:               '#BA4C4E',
-  amber:                '#FFB300',
-  white88:              'rgba(255,255,255,0.88)',
-  white60:              'rgba(255,255,255,0.60)',
-  white30:              'rgba(255,255,255,0.30)',
-  white10:              'rgba(255,255,255,0.10)',
-  white08:              'rgba(255,255,255,0.08)',
-  white06:              'rgba(255,255,255,0.06)',
-  rowDivider:           'rgba(255,255,255,0.06)',
-  hoverTonal:           'rgba(255,255,255,0.025)',
-  hoverGrey:            'rgba(255,255,255,0.06)',
-  selectedBg:           'rgba(187,134,252,0.06)',
-  selectedAccent:       '#BB86FC',
-  skeleton:             'rgba(255,255,255,0.08)',
-  sectionBg:            'rgba(255,255,255,0.03)',
-  sectionBorder:        'rgba(255,255,255,0.07)',
-  labelMuted:           '#6b7280',
+  bg:             '#0A0A0F',
+  surface:        '#181818',
+  surfaceGrey:    '#212121',
+  headerTonal:    '#0F0D14',
+  purple:         '#BB86FC',
+  success:        '#47B881',
+  warning:        '#FF863B',
+  danger:         '#BA4C4E',
+  amber:          '#FFB300',
+  white88:        'rgba(255,255,255,0.88)',
+  white60:        'rgba(255,255,255,0.60)',
+  white30:        'rgba(255,255,255,0.30)',
+  white10:        'rgba(255,255,255,0.10)',
+  white08:        'rgba(255,255,255,0.08)',
+  white06:        'rgba(255,255,255,0.06)',
+  rowDivider:     'rgba(255,255,255,0.06)',
+  hoverTonal:     'rgba(255,255,255,0.025)',
+  hoverGrey:      'rgba(255,255,255,0.06)',
+  selectedBg:     'rgba(187,134,252,0.06)',
+  selectedAccent: '#BB86FC',
+  skeleton:       'rgba(255,255,255,0.08)',
+  sectionBg:      'rgba(255,255,255,0.03)',
+  sectionBorder:  'rgba(255,255,255,0.07)',
+  labelMuted:     '#6b7280',
 } as const;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type Density       = 'desktop' | 'tablet' | 'mobile';
-export type Theme         = 'tonal' | 'grey';
-export type RowState      = 'default' | 'hover' | 'selected' | 'loading' | 'empty';
-export type Sentiment     = 'neutral' | 'positive' | 'negative' | 'warning';
-export type SortDir       = 'none' | 'asc' | 'desc';
-export type Align         = 'left' | 'center';
-export type StatusDisplay = 'complete' | 'in-progress' | 'incomplete' | 'empty';
+export type Density         = 'desktop' | 'tablet' | 'mobile';
+export type Theme           = 'tonal' | 'grey';
+export type RowState        = 'default' | 'hover' | 'selected' | 'loading' | 'empty';
+export type Sentiment       = 'neutral' | 'positive' | 'negative' | 'warning';
+export type SortDir         = 'none' | 'asc' | 'desc';
+export type Align           = 'left' | 'center';
+export type StatusDisplay   = 'complete' | 'in-progress' | 'incomplete' | 'empty';
 export type HealthSentiment = 'good' | 'warning' | 'bad';
-export type ActionType    = 'download' | 'open' | 'view';
+export type ActionType      = 'download' | 'open' | 'view';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -143,14 +143,22 @@ export function IconEmpty() {
   );
 }
 
+export function IconWarning({ size = 14, color = T.warning }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+      <circle cx="8" cy="8" r="7" stroke={color} strokeWidth="1.5" />
+      <path d="M8 5V9" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="8" cy="11.5" r="0.75" fill={color} />
+    </svg>
+  );
+}
+
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 export function Skeleton({ width, height = 12 }: { width: number; height?: number }) {
   return (
     <div style={{
-      width,
-      height,
-      borderRadius: 4,
+      width, height, borderRadius: 4,
       background: T.skeleton,
       animation: 'shimmer 1.5s ease-in-out infinite',
     }} />
@@ -235,29 +243,6 @@ export interface CellStatusProps {
   width: number;
 }
 
-function StatusPill({ color, label, dot }: { color: string; label: string; dot?: boolean }) {
-  return (
-    <div style={{
-      display: 'inline-flex', alignItems: 'center', gap: 4,
-      padding: '0 8px', height: 20, borderRadius: 999,
-      background: `${color}26`,
-      border: `1px solid ${color}66`,
-      flexShrink: 0,
-    }}>
-      {dot
-        ? <div style={{ width: 6, height: 6, borderRadius: '50%', background: color }} />
-        : <IconCheck size={12} color={color} />
-      }
-      <span style={{
-        fontFamily: 'Inter, sans-serif', fontSize: 11, fontWeight: 500,
-        color, whiteSpace: 'nowrap',
-      }}>
-        {label}
-      </span>
-    </div>
-  );
-}
-
 export function CellStatus({
   display = 'empty', progress = 72, density = 'desktop', width,
 }: CellStatusProps) {
@@ -273,12 +258,24 @@ export function CellStatus({
       justifyContent: display === 'complete' && isMobile ? 'center' : 'flex-start',
       padding: '0 16px',
     }}>
+      {/* complete — desktop/tablet: pill with checkmark */}
       {display === 'complete' && !isMobile && (
-        <StatusPill color={T.success} label="Complete" />
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+          padding: '0 8px', height: 20, borderRadius: 999,
+          background: `${T.success}26`, border: `1px solid ${T.success}66`, flexShrink: 0,
+        }}>
+          <IconCheck size={12} color={T.success} />
+          <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, fontWeight: 500, color: T.success }}>
+            Complete
+          </span>
+        </div>
       )}
+      {/* complete — mobile: checkmark icon only */}
       {display === 'complete' && isMobile && (
         <IconCheck size={16} color={T.success} />
       )}
+      {/* in-progress — desktop/tablet: % text + bar */}
       {display === 'in-progress' && !isMobile && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: percentColor }}>
@@ -296,14 +293,25 @@ export function CellStatus({
           </div>
         </div>
       )}
+      {/* in-progress — mobile: % text only */}
       {display === 'in-progress' && isMobile && (
         <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: percentColor }}>
           {progress}%
         </span>
       )}
+      {/* incomplete — desktop/tablet: dot + label, no bg/border */}
       {display === 'incomplete' && !isMobile && (
-        <StatusPill color={T.danger} label="Incomplete Data" dot />
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: T.danger, flexShrink: 0 }} />
+          <span style={{
+            fontFamily: 'Inter, sans-serif', fontSize: 11, fontWeight: 500,
+            color: T.danger, whiteSpace: 'nowrap',
+          }}>
+            Incomplete Data
+          </span>
+        </div>
       )}
+      {/* empty or incomplete-mobile: em dash */}
       {(display === 'empty' || (display === 'incomplete' && isMobile)) && (
         <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: T.white30 }}>—</span>
       )}
@@ -381,10 +389,11 @@ export interface HeaderCellProps {
   width: number;
   density?: Density;
   onSort?: () => void;
+  onResizeStart?: (e: React.MouseEvent) => void;
 }
 
 export function HeaderCell({
-  label, sort = 'none', align = 'left', width, density = 'desktop', onSort,
+  label, sort = 'none', align = 'left', width, density = 'desktop', onSort, onResizeStart,
 }: HeaderCellProps) {
   const [hovered, setHovered] = useState(false);
 
@@ -394,6 +403,7 @@ export function HeaderCell({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
+        position: 'relative',
         width, height: 40, flexShrink: 0,
         display: 'flex', alignItems: 'center',
         justifyContent: align === 'center' ? 'center' : 'space-between',
@@ -402,6 +412,7 @@ export function HeaderCell({
         cursor: onSort ? 'pointer' : 'default',
         transition: 'background 120ms ease',
         userSelect: 'none',
+        boxSizing: 'border-box',
       }}
     >
       {align === 'left' ? (
@@ -409,7 +420,8 @@ export function HeaderCell({
           <span style={{
             fontFamily: 'Inter, sans-serif', fontSize: 11, fontWeight: 500,
             color: hovered ? T.white88 : 'rgba(255,255,255,0.8)',
-            textTransform: 'uppercase', letterSpacing: '0.06em', flex: 1,
+            textTransform: 'uppercase', letterSpacing: '0.06em',
+            flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
             {label}
           </span>
@@ -425,6 +437,18 @@ export function HeaderCell({
             {label}
           </span>
           {sort !== undefined && <IconSort dir={sort} />}
+        </div>
+      )}
+      {onResizeStart && (
+        <div
+          onMouseDown={e => { e.stopPropagation(); onResizeStart(e); }}
+          style={{
+            position: 'absolute', right: 0, top: 0, bottom: 0,
+            width: 8, cursor: 'col-resize',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <div style={{ width: 2, height: 16, borderRadius: 1, background: 'rgba(255,255,255,0.2)' }} />
         </div>
       )}
     </div>
@@ -504,10 +528,8 @@ export function RowBase({
 
 // ─── RowDivider ───────────────────────────────────────────────────────────────
 
-export interface RowDividerProps { width: number }
-
-export function RowDivider({ width }: RowDividerProps) {
-  return <div style={{ width, height: 1, background: 'rgba(255,255,255,0.08)', flexShrink: 0 }} />;
+export function RowDivider() {
+  return <div style={{ width: '100%', height: 1, background: 'rgba(255,255,255,0.08)' }} />;
 }
 
 // ─── RowSectionDivider ────────────────────────────────────────────────────────
@@ -518,10 +540,12 @@ export interface RowSectionDividerProps {
   density?: Density;
   width: number;
   onToggle?: () => void;
+  showWarning?: boolean;
 }
 
 export function RowSectionDivider({
-  label = '2 INCOMPLETE', expanded = true, density = 'desktop', width, onToggle,
+  label = '2 INCOMPLETE', expanded = true, density = 'desktop',
+  width, onToggle, showWarning = false,
 }: RowSectionDividerProps) {
   const [hovered, setHovered] = useState(false);
   const indent = density === 'desktop' ? 40 : 32;
@@ -533,7 +557,7 @@ export function RowSectionDivider({
       onMouseLeave={() => setHovered(false)}
       style={{
         width, height: 28, flexShrink: 0,
-        display: 'flex', alignItems: 'center', gap: 8,
+        display: 'flex', alignItems: 'center', gap: 6,
         paddingLeft: indent, paddingRight: 16,
         background: hovered ? T.white06 : T.sectionBg,
         borderTop: `0.5px solid ${T.sectionBorder}`,
@@ -547,6 +571,7 @@ export function RowSectionDivider({
         size={14}
         color={hovered ? 'rgba(255,255,255,0.7)' : T.white30}
       />
+      {showWarning && <IconWarning size={14} color={T.warning} />}
       <span style={{
         fontFamily: 'Inter, sans-serif', fontSize: 11, fontWeight: 600,
         textTransform: 'uppercase', letterSpacing: '0.08em', color: T.labelMuted,
@@ -581,7 +606,6 @@ export function RowEmptyState({
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 8,
     }}>
-      <IconEmpty />
       <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
         {primaryLabel}
       </span>
