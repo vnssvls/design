@@ -6,6 +6,7 @@ export const T = {
   bg:             '#0A0A0F',
   surface:        '#181818',
   surfaceGrey:    '#212121',
+  grey2:          '#0F0F12',
   headerTonal:    '#0F0D14',
   purple:         '#BB86FC',
   success:        '#47B881',
@@ -538,14 +539,13 @@ export interface RowSectionDividerProps {
   label?: string;
   expanded?: boolean;
   density?: Density;
-  width: number;
   onToggle?: () => void;
   showWarning?: boolean;
 }
 
 export function RowSectionDivider({
   label = '2 INCOMPLETE', expanded = true, density = 'desktop',
-  width, onToggle, showWarning = false,
+  onToggle, showWarning = false,
 }: RowSectionDividerProps) {
   const [hovered, setHovered] = useState(false);
   const indent = density === 'desktop' ? 40 : 32;
@@ -556,7 +556,7 @@ export function RowSectionDivider({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        width, height: 28, flexShrink: 0,
+        width: '100%', height: 28, flexShrink: 0,
         display: 'flex', alignItems: 'center', gap: 6,
         paddingLeft: indent, paddingRight: 16,
         background: hovered ? T.white06 : T.sectionBg,
@@ -589,7 +589,6 @@ export interface RowEmptyStateProps {
   secondaryLabel?: string;
   showSecondary?: boolean;
   density?: Density;
-  width: number;
 }
 
 export function RowEmptyState({
@@ -597,12 +596,11 @@ export function RowEmptyState({
   secondaryLabel = 'Try a different date range or filter',
   showSecondary = true,
   density = 'desktop',
-  width,
 }: RowEmptyStateProps) {
   const height = density === 'mobile' ? 96 : 120;
   return (
     <div style={{
-      width, height, flexShrink: 0,
+      width: '100%', height, flexShrink: 0,
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 8,
     }}>

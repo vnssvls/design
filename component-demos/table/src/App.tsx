@@ -242,8 +242,7 @@ export default function App() {
   // Derive cols with dynamic widths
   const baseCols = density === 'tablet' ? COLS_TABLET : COLS_DESKTOP;
   const cols = baseCols.map(c => ({ ...c, width: colWidths[c.key] ?? c.width }));
-  const tableWidth = cols.reduce((s, c) => s + c.width, 0);
-  const tableBg = theme === 'grey' ? T.surfaceGrey : T.headerTonal;
+  const tableBg = theme === 'grey' ? T.surfaceGrey : T.grey2;
 
   function handleSort(key: string) {
     if (sortKey !== key) {
@@ -399,7 +398,6 @@ export default function App() {
                 label={`${EMPTY_ROWS.length} incomplete`}
                 expanded={sectionOpen}
                 density={density}
-                width={tableWidth}
                 showWarning={true}
                 onToggle={() => setSectionOpen(v => !v)}
               />
@@ -609,10 +607,10 @@ export default function App() {
           <Card>
             <SectionLabel>RowSectionDivider — expanded / collapsed</SectionLabel>
             <div style={{ background: T.headerTonal, borderRadius: 8, overflow: 'hidden' }}>
-              <RowSectionDivider label="3 no data"    expanded={true}  density="desktop" width={440} />
-              <RowSectionDivider label="3 no data"    expanded={false} density="desktop" width={440} />
+              <RowSectionDivider label="3 no data"    expanded={true}  density="desktop" />
+              <RowSectionDivider label="3 no data"    expanded={false} density="desktop" />
               <RowDivider />
-              <RowSectionDivider label="2 incomplete" expanded={true}  density="tablet"  width={440} showWarning={true} />
+              <RowSectionDivider label="2 incomplete" expanded={true}  density="tablet"  showWarning={true} />
             </div>
           </Card>
           <Card>
@@ -621,7 +619,7 @@ export default function App() {
               {(['desktop', 'tablet', 'mobile'] as Density[]).map(d => (
                 <div key={d} style={{ borderBottom: `0.5px solid ${T.rowDivider}` }}>
                   <div style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif', padding: '8px 16px' }}>density={d}</div>
-                  <RowEmptyState density={d} width={440} />
+                  <RowEmptyState density={d} />
                 </div>
               ))}
             </div>
