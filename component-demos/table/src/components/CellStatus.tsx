@@ -17,7 +17,7 @@ export function CellStatus({
 }: CellStatusProps) {
   const height = density === 'tablet' ? 48 : 58;
   const isMobile = density === 'mobile';
-  const percentColor = progress === 0 ? T.danger : T.amber;
+  const percentColor = progress === 0 ? T.danger : T.warning;
 
   return (
     <div style={{
