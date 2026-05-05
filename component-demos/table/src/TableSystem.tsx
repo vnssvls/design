@@ -182,7 +182,7 @@ export function CellText({
   const height = density === 'tablet' ? 48 : 58;
   return (
     <div style={{
-      width, height, flexShrink: 0,
+      width, height, flexShrink: 0, boxSizing: 'border-box',
       display: 'flex', alignItems: 'center',
       justifyContent: align === 'center' ? 'center' : 'flex-start',
       padding: '0 16px',
@@ -221,7 +221,7 @@ export function CellMetric({
   const height = density === 'tablet' ? 48 : 58;
   return (
     <div style={{
-      width, height, flexShrink: 0,
+      width, height, flexShrink: 0, boxSizing: 'border-box',
       display: 'flex', alignItems: 'center',
       padding: '0 16px',
     }}>
@@ -254,7 +254,7 @@ export function CellStatus({
 
   return (
     <div style={{
-      width, height, flexShrink: 0,
+      width, height, flexShrink: 0, boxSizing: 'border-box',
       display: 'flex', alignItems: 'center',
       justifyContent: 'flex-start',
       padding: '0 16px',
