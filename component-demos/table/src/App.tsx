@@ -84,19 +84,20 @@ interface ColDef {
   key: string;
   label: string;
   width: number;
+  minWidth?: number; // minimum resize width — based on widest cell content
   align: 'left' | 'center';
   sortable?: boolean;
   resizable?: boolean;
-  grow?: boolean; // true = flex-grow to fill container; false = fixed width
+  grow?: boolean;
 }
 
 const COLS_DESKTOP: ColDef[] = [
-  { key: 'name',     label: 'Name',     width: 220, align: 'left',   sortable: true,  resizable: true,  grow: true  },
-  { key: 'value',    label: 'Value',    width: 100, align: 'left',   sortable: true,  resizable: true,  grow: true  },
-  { key: 'category', label: 'Category', width: 120, align: 'left',   sortable: false, resizable: true,  grow: true  },
-  { key: 'status',   label: 'Status',   width: 160, align: 'left',   sortable: false, resizable: true,  grow: true  },
-  { key: 'health',   label: 'Health',   width: 90,  align: 'center', sortable: false, resizable: false, grow: false },
-  { key: 'action',   label: '',         width: 72,  align: 'center', sortable: false, resizable: false, grow: false },
+  { key: 'name',     label: 'Name',     width: 220, minWidth: 120, align: 'left',   sortable: true,  resizable: true,  grow: true  },
+  { key: 'value',    label: 'Value',    width: 100, minWidth: 80,  align: 'left',   sortable: true,  resizable: true,  grow: true  },
+  { key: 'category', label: 'Category', width: 120, minWidth: 80,  align: 'left',   sortable: false, resizable: true,  grow: true  },
+  { key: 'status',   label: 'Status',   width: 160, minWidth: 140, align: 'left',   sortable: false, resizable: true,  grow: true  },
+  { key: 'health',   label: 'Health',   width: 90,                 align: 'center', sortable: false, resizable: false, grow: false },
+  { key: 'action',   label: '',         width: 72,                 align: 'center', sortable: false, resizable: false, grow: false },
 ];
 
 // When resizable is on, fixed pixel widths are needed so drag produces exact sizes.
@@ -268,11 +269,13 @@ export default function App() {
   function handleResizeStart(key: string, e: React.MouseEvent) {
     e.preventDefault();
     const startWidth = colWidths[key] ?? 100;
+    const col = COLS_DESKTOP.find(c => c.key === key);
+    const minWidth = col?.minWidth ?? 60;
     dragRef.current = { key, startX: e.clientX, startWidth };
 
     function onMove(ev: MouseEvent) {
       if (!dragRef.current) return;
-      const newWidth = Math.max(60, dragRef.current.startWidth + ev.clientX - dragRef.current.startX);
+      const newWidth = Math.max(minWidth, dragRef.current.startWidth + ev.clientX - dragRef.current.startX);
       setColWidths(prev => ({ ...prev, [dragRef.current!.key]: newWidth }));
     }
 
@@ -371,7 +374,8 @@ export default function App() {
 
         {resizable && (
           <p style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif', marginBottom: 8, marginTop: -8 }}>
-            Drag the handle at the right edge of Name, Value, Category, or Status headers to resize. Min width 60px.
+            Drag the handle at the right edge of Name, Value, Category, or Status headers to resize.
+            Min widths: Name 120px · Value 80px · Category 80px · Status 140px.
           </p>
         )}
 
