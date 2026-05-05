@@ -1,10 +1,9 @@
 import React, { useState, useRef } from 'react';
+import { T, Density, Theme, RowState, Sentiment, SortDir, StatusDisplay, HealthSentiment, ActionType } from './tokens';
 import {
-  T,
-  Density, Theme, RowState, Sentiment, SortDir, StatusDisplay, HealthSentiment, ActionType,
   CellText, CellMetric, CellStatus, CellHealth, CellAction,
   HeaderCell, RowBase, RowDivider, RowSectionDivider, RowEmptyState,
-} from './TableSystem';
+} from './components';
 
 // ─── Demo primitives ──────────────────────────────────────────────────────────
 
@@ -73,6 +72,89 @@ function H2({ children }: { children: React.ReactNode }) {
 
 function Divider() {
   return <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '48px 0' }} />;
+}
+
+// ─── ShowcaseCard ─────────────────────────────────────────────────────────────
+//
+// Storybook-style variant viewer. Each variant has a label, a preview node,
+// and a code string. Clicking a variant tab switches the preview and code panel.
+// The code panel is collapsible.
+
+interface ShowcaseVariant {
+  label: string;
+  preview: React.ReactNode;
+  code: string;
+}
+
+function ShowcaseCard({ title, variants, previewBg }: {
+  title: string;
+  variants: ShowcaseVariant[];
+  previewBg?: string;
+}) {
+  const [active, setActive] = useState(0);
+  const [codeOpen, setCodeOpen] = useState(false);
+
+  const v = variants[active];
+
+  return (
+    <Card>
+      <SectionLabel>{title}</SectionLabel>
+
+      {/* Variant tabs */}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+        {variants.map((vv, i) => (
+          <button
+            key={i}
+            onClick={() => { setActive(i); setCodeOpen(false); }}
+            style={{
+              padding: '4px 10px', borderRadius: 4,
+              border: `1px solid ${i === active ? T.purple : T.rowDivider}`,
+              background: i === active ? 'rgba(187,134,252,0.1)' : 'transparent',
+              color: i === active ? T.purple : T.white60,
+              fontSize: 11, fontFamily: 'Inter, sans-serif', cursor: 'pointer',
+              transition: 'all 120ms ease',
+            }}
+          >
+            {vv.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Preview */}
+      <div style={{
+        background: previewBg ?? T.headerTonal, borderRadius: 8,
+        padding: 16, marginBottom: 12,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        minHeight: 58,
+      }}>
+        {v.preview}
+      </div>
+
+      {/* Code toggle */}
+      <button
+        onClick={() => setCodeOpen(o => !o)}
+        style={{
+          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+          color: T.white30, fontSize: 11, fontFamily: 'Inter, sans-serif',
+          display: 'flex', alignItems: 'center', gap: 4,
+        }}
+      >
+        <span style={{ transform: codeOpen ? 'rotate(90deg)' : 'none', display: 'inline-block', transition: 'transform 120ms ease' }}>▶</span>
+        {codeOpen ? 'hide code' : 'show code'}
+      </button>
+
+      {codeOpen && (
+        <div style={{
+          marginTop: 10,
+          background: '#0F0F12', borderRadius: 8, padding: 16,
+          fontFamily: 'monospace', fontSize: 12, color: T.white60,
+          lineHeight: 1.7, overflow: 'auto',
+        }}>
+          <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{v.code}</pre>
+        </div>
+      )}
+    </Card>
+  );
 }
 
 // ─── Column definitions ───────────────────────────────────────────────────────
@@ -446,97 +528,148 @@ export default function App() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
 
           {/* CellText */}
-          <Card>
-            <SectionLabel>CellText — align × empty</SectionLabel>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 0, background: tableBg }}>
-              {(['left', 'center'] as const).map(align =>
-                [false, true].map(empty => (
-                  <div key={`${align}-${empty}`} style={{ display: 'flex', alignItems: 'center', borderBottom: `0.5px solid ${T.rowDivider}` }}>
-                    <span style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif', minWidth: 90, padding: '0 12px' }}>
-                      {align}, {empty ? 'empty' : 'value'}
-                    </span>
-                    <CellText value="Sample text" align={align} empty={empty} width={160} density={cellDensity} />
+          <ShowcaseCard
+            title="CellText — align × empty"
+            variants={[
+              {
+                label: 'left, value',
+                preview: <CellText value="Sample text" align="left" width={200} density={cellDensity} />,
+                code: `<CellText value="Sample text" align="left" width={200} density="${cellDensity}" />`,
+              },
+              {
+                label: 'center, value',
+                preview: <CellText value="Sample text" align="center" width={200} density={cellDensity} />,
+                code: `<CellText value="Sample text" align="center" width={200} density="${cellDensity}" />`,
+              },
+              {
+                label: 'left, empty',
+                preview: <CellText value="Sample text" align="left" empty width={200} density={cellDensity} />,
+                code: `<CellText value="Sample text" align="left" empty width={200} density="${cellDensity}" />\n// empty=true renders an em dash regardless of value`,
+              },
+              {
+                label: 'flex grow',
+                preview: (
+                  <div style={{ width: '100%', display: 'flex' }}>
+                    <CellText value="Grows to fill" align="left" width={120} density={cellDensity} flex="1 0 120px" />
                   </div>
-                ))
-              )}
-            </div>
-          </Card>
+                ),
+                code: `// flex prop switches from fixed-width to growable\n<CellText value="Grows to fill" align="left" width={120} flex="1 0 120px" density="${cellDensity}" />`,
+              },
+            ]}
+          />
 
           {/* CellMetric */}
-          <Card>
-            <SectionLabel>CellMetric — sentiment × empty</SectionLabel>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 0, background: tableBg }}>
-              {(['neutral', 'positive', 'negative', 'warning'] as const).map(s => (
-                <div key={s} style={{ display: 'flex', alignItems: 'center', borderBottom: `0.5px solid ${T.rowDivider}` }}>
-                  <span style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif', minWidth: 90, padding: '0 12px' }}>{s}</span>
-                  <CellMetric value="22.5%" sentiment={s} width={120} density={cellDensity} />
-                </div>
-              ))}
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif', minWidth: 90, padding: '0 12px' }}>empty</span>
-                <CellMetric value="22.5%" empty width={120} density={cellDensity} />
-              </div>
-            </div>
-          </Card>
+          <ShowcaseCard
+            title="CellMetric — sentiment × empty"
+            variants={[
+              {
+                label: 'positive',
+                preview: <CellMetric value="22.5%" sentiment="positive" width={160} density={cellDensity} />,
+                code: `<CellMetric value="22.5%" sentiment="positive" width={160} density="${cellDensity}" />`,
+              },
+              {
+                label: 'negative',
+                preview: <CellMetric value="-4.1%" sentiment="negative" width={160} density={cellDensity} />,
+                code: `<CellMetric value="-4.1%" sentiment="negative" width={160} density="${cellDensity}" />`,
+              },
+              {
+                label: 'warning',
+                preview: <CellMetric value="18.2%" sentiment="warning" width={160} density={cellDensity} />,
+                code: `<CellMetric value="18.2%" sentiment="warning" width={160} density="${cellDensity}" />`,
+              },
+              {
+                label: 'neutral',
+                preview: <CellMetric value="€12.40" sentiment="neutral" width={160} density={cellDensity} />,
+                code: `<CellMetric value="€12.40" sentiment="neutral" width={160} density="${cellDensity}" />`,
+              },
+              {
+                label: 'empty',
+                preview: <CellMetric value="22.5%" empty width={160} density={cellDensity} />,
+                code: `// empty=true renders an em dash, ignores value\n<CellMetric value="22.5%" empty width={160} density="${cellDensity}" />`,
+              },
+            ]}
+          />
 
           {/* CellStatus */}
-          <Card>
-            <SectionLabel>CellStatus — display × density</SectionLabel>
-            <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 12, color: T.white60, fontFamily: 'Inter, sans-serif' }}>
-                in-progress %:
-              </span>
-              <input
-                type="range" min={0} max={100}
-                value={testProgress}
-                onChange={e => setTestProgress(Number(e.target.value))}
-                style={{ width: 120, accentColor: T.purple }}
-              />
-              <span style={{ fontSize: 12, color: T.white88, fontFamily: 'Inter, sans-serif', minWidth: 32 }}>
-                {testProgress}%
-              </span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 0, background: tableBg }}>
-              {(['complete', 'in-progress', 'incomplete', 'empty'] as StatusDisplay[]).map(d => (
-                <div key={d} style={{ display: 'flex', alignItems: 'center', borderBottom: `0.5px solid ${T.rowDivider}` }}>
-                  <span style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif', minWidth: 90, padding: '0 12px' }}>{d}</span>
-                  <CellStatus display={d} progress={d === 'in-progress' ? testProgress : 100} density={cellDensity} width={180} />
-                </div>
-              ))}
-            </div>
-            {cellDensity === 'desktop' && testProgress === 0 && (
-              <p style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif', marginTop: 8 }}>
-                0% renders in danger red — code-level logic, no separate variant.
-              </p>
-            )}
-          </Card>
+          <ShowcaseCard
+            title="CellStatus — display × density"
+            variants={[
+              {
+                label: 'complete',
+                preview: <CellStatus display="complete" progress={100} density={cellDensity} width={200} />,
+                code: `<CellStatus display="complete" progress={100} density="${cellDensity}" width={200} />`,
+              },
+              {
+                label: 'in-progress 65%',
+                preview: <CellStatus display="in-progress" progress={65} density={cellDensity} width={200} />,
+                code: `<CellStatus display="in-progress" progress={65} density="${cellDensity}" width={200} />`,
+              },
+              {
+                label: 'in-progress 0%',
+                preview: <CellStatus display="in-progress" progress={0} density={cellDensity} width={200} />,
+                code: `// 0% renders in danger red — no count started yet\n<CellStatus display="in-progress" progress={0} density="${cellDensity}" width={200} />`,
+              },
+              {
+                label: 'incomplete',
+                preview: <CellStatus display="incomplete" progress={0} density={cellDensity} width={200} />,
+                code: `// incomplete: dot + text only, no pill bg\n<CellStatus display="incomplete" progress={0} density="${cellDensity}" width={200} />`,
+              },
+              {
+                label: 'empty',
+                preview: <CellStatus display="empty" progress={0} density={cellDensity} width={200} />,
+                code: `// empty: em dash\n<CellStatus display="empty" progress={0} density="${cellDensity}" width={200} />`,
+              },
+            ]}
+          />
 
           {/* CellHealth + CellAction */}
-          <Card>
-            <SectionLabel>CellHealth — sentiment</SectionLabel>
-            <div style={{ display: 'flex', gap: 0, background: tableBg, marginBottom: 16 }}>
-              {(['good', 'warning', 'bad'] as HealthSentiment[]).map(s => (
-                <div key={s} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '8px 0' }}>
-                  <CellHealth sentiment={s} width={80} density={cellDensity} />
-                  <span style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif' }}>{s}</span>
-                </div>
-              ))}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '8px 0' }}>
-                <CellHealth sentiment="good" empty width={80} density={cellDensity} />
-                <span style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif' }}>empty</span>
-              </div>
-            </div>
-
-            <SectionLabel>CellAction — action</SectionLabel>
-            <div style={{ display: 'flex', gap: 0, background: tableBg }}>
-              {(['download', 'open', 'view'] as ActionType[]).map(a => (
-                <div key={a} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '8px 0' }}>
-                  <CellAction action={a} width={72} density={cellDensity} />
-                  <span style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif' }}>{a}</span>
-                </div>
-              ))}
-            </div>
-          </Card>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <ShowcaseCard
+              title="CellHealth — sentiment"
+              variants={[
+                {
+                  label: 'good',
+                  preview: <CellHealth sentiment="good" width={90} density={cellDensity} />,
+                  code: `<CellHealth sentiment="good" width={90} density="${cellDensity}" />`,
+                },
+                {
+                  label: 'warning',
+                  preview: <CellHealth sentiment="warning" width={90} density={cellDensity} />,
+                  code: `<CellHealth sentiment="warning" width={90} density="${cellDensity}" />`,
+                },
+                {
+                  label: 'bad',
+                  preview: <CellHealth sentiment="bad" width={90} density={cellDensity} />,
+                  code: `<CellHealth sentiment="bad" width={90} density="${cellDensity}" />`,
+                },
+                {
+                  label: 'empty',
+                  preview: <CellHealth sentiment="good" empty width={90} density={cellDensity} />,
+                  code: `<CellHealth sentiment="good" empty width={90} density="${cellDensity}" />`,
+                },
+              ]}
+            />
+            <ShowcaseCard
+              title="CellAction — action"
+              variants={[
+                {
+                  label: 'download',
+                  preview: <CellAction action="download" width={72} density={cellDensity} />,
+                  code: `<CellAction action="download" width={72} density="${cellDensity}" />`,
+                },
+                {
+                  label: 'open',
+                  preview: <CellAction action="open" width={72} density={cellDensity} />,
+                  code: `<CellAction action="open" width={72} density="${cellDensity}" />`,
+                },
+                {
+                  label: 'view',
+                  preview: <CellAction action="view" width={72} density={cellDensity} />,
+                  code: `<CellAction action="view" width={72} density="${cellDensity}" />`,
+                },
+              ]}
+            />
+          </div>
 
         </div>
 
@@ -548,22 +681,106 @@ export default function App() {
           Hover any cell to see the state change. Sortable columns show the sort icon on hover.
         </p>
 
-        <Card style={{ marginBottom: 48 }}>
-          <div style={{ background: T.headerTonal, borderRadius: 8, overflow: 'hidden' }}>
-            {(['none', 'asc', 'desc'] as SortDir[]).map(sort => (
-              <div key={sort} style={{ display: 'flex', borderBottom: `0.5px solid ${T.rowDivider}` }}>
-                <span style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif', minWidth: 56, padding: '0 16px', display: 'flex', alignItems: 'center' }}>
-                  sort={sort}
-                </span>
-                <HeaderCell label="Column" sort={sort} align="left"   width={160} onSort={() => {}} />
-                <HeaderCell label="Column" sort={sort} align="center" width={120} onSort={() => {}} />
-              </div>
-            ))}
-          </div>
-          <p style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif', marginTop: 12, marginBottom: 0 }}>
-            Left column: align=left. Right column: align=center. Hover each cell to see hover state.
-          </p>
-        </Card>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 48 }}>
+          <ShowcaseCard
+            title="HeaderCell — sort direction"
+            variants={[
+              {
+                label: 'sort=none',
+                preview: (
+                  <div style={{ display: 'flex', width: '100%' }}>
+                    <HeaderCell label="Column" sort="none" align="left" width={200} onSort={() => {}} />
+                  </div>
+                ),
+                code: `// sort=none: icon visible but inactive\n<HeaderCell label="Column" sort="none" align="left" width={200} onSort={() => {}} />`,
+              },
+              {
+                label: 'sort=asc',
+                preview: (
+                  <div style={{ display: 'flex', width: '100%' }}>
+                    <HeaderCell label="Column" sort="asc" align="left" width={200} onSort={() => {}} />
+                  </div>
+                ),
+                code: `<HeaderCell label="Column" sort="asc" align="left" width={200} onSort={() => handleSort('key')} />`,
+              },
+              {
+                label: 'sort=desc',
+                preview: (
+                  <div style={{ display: 'flex', width: '100%' }}>
+                    <HeaderCell label="Column" sort="desc" align="left" width={200} onSort={() => {}} />
+                  </div>
+                ),
+                code: `<HeaderCell label="Column" sort="desc" align="left" width={200} onSort={() => handleSort('key')} />`,
+              },
+              {
+                label: 'not sortable',
+                preview: (
+                  <div style={{ display: 'flex', width: '100%' }}>
+                    <HeaderCell label="Column" align="left" width={200} />
+                  </div>
+                ),
+                code: `// omit sort prop entirely to hide the sort icon\n<HeaderCell label="Column" align="left" width={200} />`,
+              },
+              {
+                label: 'center align',
+                preview: (
+                  <div style={{ display: 'flex', width: '100%' }}>
+                    <HeaderCell label="Health" sort="none" align="center" width={200} onSort={() => {}} />
+                  </div>
+                ),
+                code: `<HeaderCell label="Health" sort="none" align="center" width={200} onSort={() => {}} />`,
+              },
+              {
+                label: 'resizable',
+                preview: (
+                  <div style={{ display: 'flex', width: '100%' }}>
+                    <HeaderCell label="Name" sort="none" align="left" width={200} onSort={() => {}} onResizeStart={() => {}} />
+                  </div>
+                ),
+                code: `// onResizeStart presence renders the 8px drag handle at right edge\n<HeaderCell label="Name" sort="none" align="left" width={220}\n  onSort={() => handleSort('name')}\n  onResizeStart={(e) => handleResizeStart('name', e)} />`,
+              },
+            ]}
+          />
+
+          <ShowcaseCard
+            title="HeaderCell — all sort states side by side"
+            previewBg={T.headerTonal}
+            variants={[
+              {
+                label: 'left align',
+                preview: (
+                  <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                    {(['none', 'asc', 'desc'] as SortDir[]).map(sort => (
+                      <div key={sort} style={{ display: 'flex', borderBottom: `0.5px solid ${T.rowDivider}` }}>
+                        <span style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif', minWidth: 56, padding: '0 12px', display: 'flex', alignItems: 'center' }}>
+                          {sort}
+                        </span>
+                        <HeaderCell label="Column" sort={sort} align="left" width={160} onSort={() => {}} />
+                      </div>
+                    ))}
+                  </div>
+                ),
+                code: `{(['none', 'asc', 'desc'] as SortDir[]).map(sort => (\n  <HeaderCell key={sort} label="Column" sort={sort} align="left"\n    width={160} onSort={() => handleSort('key')} />\n))}`,
+              },
+              {
+                label: 'center align',
+                preview: (
+                  <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                    {(['none', 'asc', 'desc'] as SortDir[]).map(sort => (
+                      <div key={sort} style={{ display: 'flex', borderBottom: `0.5px solid ${T.rowDivider}` }}>
+                        <span style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif', minWidth: 56, padding: '0 12px', display: 'flex', alignItems: 'center' }}>
+                          {sort}
+                        </span>
+                        <HeaderCell label="Column" sort={sort} align="center" width={160} onSort={() => {}} />
+                      </div>
+                    ))}
+                  </div>
+                ),
+                code: `{(['none', 'asc', 'desc'] as SortDir[]).map(sort => (\n  <HeaderCell key={sort} label="Column" sort={sort} align="center"\n    width={160} onSort={() => handleSort('key')} />\n))}`,
+              },
+            ]}
+          />
+        </div>
 
         <Divider />
 
@@ -572,73 +789,91 @@ export default function App() {
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 48 }}>
 
-          {/* RowBase states */}
-          <Card>
-            <SectionLabel>RowBase — all states (tonal)</SectionLabel>
-            <div style={{ background: T.headerTonal, borderRadius: 8, overflow: 'hidden' }}>
-              {(['default', 'hover', 'selected', 'loading', 'empty'] as RowState[]).map(s => (
-                <div key={s} style={{ display: 'flex', alignItems: 'center' }}>
-                  <span style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif', minWidth: 72, padding: '0 12px', flexShrink: 0 }}>
-                    {s}
-                  </span>
-                  <RowBase state={s} theme="tonal" density="desktop" skeletonWidths={[160, 120, 120, 80]}>
+          <ShowcaseCard
+            title="RowBase — states (tonal)"
+            previewBg={T.headerTonal}
+            variants={([
+              ['default',  'tonal'],
+              ['hover',    'tonal'],
+              ['selected', 'tonal'],
+              ['loading',  'tonal'],
+              ['empty',    'tonal'],
+            ] as [RowState, Theme][]).map(([s, th]) => ({
+              label: s,
+              preview: (
+                <RowBase state={s} theme={th as Theme} density="desktop" skeletonWidths={[160, 120, 80]}>
+                  <CellText value="Row content" width={160} />
+                  <CellMetric value="22.5%" sentiment="positive" width={120} />
+                  <CellHealth sentiment="good" width={80} />
+                </RowBase>
+              ),
+              code: `<RowBase state="${s}" theme="tonal" density="desktop"\n  skeletonWidths={[160, 120, 80]}>\n  <CellText value="Row content" width={160} />\n  <CellMetric value="22.5%" sentiment="positive" width={120} />\n  <CellHealth sentiment="good" width={80} />\n</RowBase>`,
+            }))}
+          />
+
+          <ShowcaseCard
+            title="RowBase — theme comparison"
+            variants={([
+              ['tonal', 'default'],
+              ['tonal', 'hover'],
+              ['tonal', 'selected'],
+              ['grey',  'default'],
+              ['grey',  'hover'],
+              ['grey',  'selected'],
+            ] as [Theme, RowState][]).map(([th, s]) => ({
+              label: `${th} / ${s}`,
+              preview: (
+                <div style={{ background: th === 'grey' ? T.surfaceGrey : T.headerTonal, width: '100%', borderRadius: 6, overflow: 'hidden' }}>
+                  <RowBase state={s} theme={th} density="desktop">
                     <CellText value="Row content" width={160} />
                     <CellMetric value="22.5%" sentiment="positive" width={120} />
-                    <CellText value="Type A" width={120} />
                     <CellHealth sentiment="good" width={80} />
                   </RowBase>
                 </div>
-              ))}
-            </div>
-          </Card>
-
-          {/* Theme comparison */}
-          <Card>
-            <SectionLabel>RowBase — theme comparison (hover state)</SectionLabel>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {(['tonal', 'grey'] as Theme[]).map(th => (
-                <div key={th}>
-                  <span style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif', display: 'block', marginBottom: 4 }}>
-                    theme={th}
-                  </span>
-                  <div style={{ background: th === 'grey' ? T.surfaceGrey : T.headerTonal, borderRadius: 8, overflow: 'hidden' }}>
-                    {(['default', 'hover', 'selected'] as RowState[]).map(s => (
-                      <RowBase key={s} state={s} theme={th} density="desktop">
-                        <CellText value="Row content" width={160} />
-                        <CellMetric value="22.5%" sentiment="positive" width={120} />
-                        <CellHealth sentiment="good" width={80} />
-                      </RowBase>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
+              ),
+              code: `<RowBase state="${s}" theme="${th}" density="desktop">\n  <CellText value="Row content" width={160} />\n  <CellMetric value="22.5%" sentiment="positive" width={120} />\n  <CellHealth sentiment="good" width={80} />\n</RowBase>`,
+            }))}
+          />
 
         </div>
 
         {/* Section divider + empty state */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 48 }}>
-          <Card>
-            <SectionLabel>RowSectionDivider — expanded / collapsed</SectionLabel>
-            <div style={{ background: T.headerTonal, borderRadius: 8, overflow: 'hidden' }}>
-              <RowSectionDivider label="3 no data"    expanded={true}  density="desktop" />
-              <RowSectionDivider label="3 no data"    expanded={false} density="desktop" />
-              <RowDivider />
-              <RowSectionDivider label="2 incomplete" expanded={true}  density="tablet"  showWarning={true} />
-            </div>
-          </Card>
-          <Card>
-            <SectionLabel>RowEmptyState — density variants</SectionLabel>
-            <div style={{ background: T.headerTonal, borderRadius: 8, overflow: 'hidden' }}>
-              {(['desktop', 'tablet', 'mobile'] as Density[]).map(d => (
-                <div key={d} style={{ borderBottom: `0.5px solid ${T.rowDivider}` }}>
-                  <div style={{ fontSize: 11, color: T.white30, fontFamily: 'Inter, sans-serif', padding: '8px 16px' }}>density={d}</div>
-                  <RowEmptyState density={d} />
-                </div>
-              ))}
-            </div>
-          </Card>
+          <ShowcaseCard
+            title="RowSectionDivider"
+            previewBg={T.headerTonal}
+            variants={[
+              {
+                label: 'expanded',
+                preview: <RowSectionDivider label="3 no data" expanded={true} density="desktop" />,
+                code: `<RowSectionDivider label="3 no data" expanded={true} density="desktop" onToggle={() => setOpen(v => !v)} />`,
+              },
+              {
+                label: 'collapsed',
+                preview: <RowSectionDivider label="3 no data" expanded={false} density="desktop" />,
+                code: `<RowSectionDivider label="3 no data" expanded={false} density="desktop" onToggle={() => setOpen(v => !v)} />`,
+              },
+              {
+                label: 'warning',
+                preview: <RowSectionDivider label="2 incomplete" expanded={true} density="desktop" showWarning={true} />,
+                code: `// showWarning renders an orange warning icon before the label\n<RowSectionDivider label="2 incomplete" expanded={true} density="desktop"\n  showWarning={true} onToggle={() => setOpen(v => !v)} />`,
+              },
+              {
+                label: 'tablet',
+                preview: <RowSectionDivider label="2 incomplete" expanded={true} density="tablet" showWarning={true} />,
+                code: `// tablet: 32px left indent (vs 40px on desktop)\n<RowSectionDivider label="2 incomplete" expanded={true} density="tablet"\n  showWarning={true} onToggle={() => setOpen(v => !v)} />`,
+              },
+            ]}
+          />
+          <ShowcaseCard
+            title="RowEmptyState — density variants"
+            previewBg={T.headerTonal}
+            variants={(['desktop', 'tablet', 'mobile'] as Density[]).map(d => ({
+              label: d,
+              preview: <RowEmptyState density={d} />,
+              code: `<RowEmptyState density="${d}" />\n\n// Custom labels:\n<RowEmptyState density="${d}"\n  primaryLabel="No locations for this period"\n  secondaryLabel="Try a different date range or filter"\n  showSecondary={true} />`,
+            }))}
+          />
         </div>
 
         <Divider />
