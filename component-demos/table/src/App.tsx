@@ -169,7 +169,7 @@ function TableHeader({
         <HeaderCell
           key={col.key}
           label={col.label}
-          sort={col.key === sortKey ? (sortDir ?? 'none') : 'none'}
+          sort={col.sortable ? (col.key === sortKey ? (sortDir ?? 'none') : 'none') : undefined}
           align={col.align}
           width={col.width}
           density={density}
@@ -370,6 +370,7 @@ export default function App() {
           background: tableBg, borderRadius: 12,
           border: `1px solid ${T.rowDivider}`,
           overflow: 'auto', marginBottom: 48,
+          display: 'flex', flexDirection: 'column',
         }}>
           <TableHeader
             cols={cols}

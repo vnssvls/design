@@ -255,7 +255,7 @@ export function CellStatus({
     <div style={{
       width, height, flexShrink: 0,
       display: 'flex', alignItems: 'center',
-      justifyContent: display === 'complete' && isMobile ? 'center' : 'flex-start',
+      justifyContent: 'flex-start',
       padding: '0 16px',
     }}>
       {/* complete — desktop/tablet: pill with checkmark */}
