@@ -87,16 +87,24 @@ interface ColDef {
   align: 'left' | 'center';
   sortable?: boolean;
   resizable?: boolean;
+  grow?: boolean; // true = flex-grow to fill container; false = fixed width
 }
 
 const COLS_DESKTOP: ColDef[] = [
-  { key: 'name',     label: 'Name',     width: 220, align: 'left',   sortable: true,  resizable: true  },
-  { key: 'value',    label: 'Value',    width: 100, align: 'left',   sortable: true,  resizable: true  },
-  { key: 'category', label: 'Category', width: 120, align: 'left',   sortable: false, resizable: true  },
-  { key: 'status',   label: 'Status',   width: 160, align: 'left',   sortable: false, resizable: true  },
-  { key: 'health',   label: 'Health',   width: 90,  align: 'center', sortable: false, resizable: false },
-  { key: 'action',   label: '',         width: 72,  align: 'center', sortable: false, resizable: false },
+  { key: 'name',     label: 'Name',     width: 220, align: 'left',   sortable: true,  resizable: true,  grow: true  },
+  { key: 'value',    label: 'Value',    width: 100, align: 'left',   sortable: true,  resizable: true,  grow: true  },
+  { key: 'category', label: 'Category', width: 120, align: 'left',   sortable: false, resizable: true,  grow: true  },
+  { key: 'status',   label: 'Status',   width: 160, align: 'left',   sortable: false, resizable: true,  grow: true  },
+  { key: 'health',   label: 'Health',   width: 90,  align: 'center', sortable: false, resizable: false, grow: false },
+  { key: 'action',   label: '',         width: 72,  align: 'center', sortable: false, resizable: false, grow: false },
 ];
+
+// When resizable is on, fixed pixel widths are needed so drag produces exact sizes.
+// When off, growable columns flex to fill the container.
+function colFlex(col: ColDef, isResizable: boolean): string {
+  if (isResizable || col.grow === false) return `0 0 ${col.width}px`;
+  return `1 0 ${col.width}px`;
+}
 
 const COLS_TABLET: ColDef[] = COLS_DESKTOP
   .filter(c => c.key !== 'category')
@@ -158,11 +166,10 @@ function TableHeader({
   onResizeStart?: (key: string, e: React.MouseEvent) => void;
 }) {
   const bg = theme === 'grey' ? T.surfaceGrey : T.headerTonal;
-  const totalWidth = cols.reduce((s, c) => s + c.width, 0);
   return (
     <div style={{
       display: 'flex', background: bg,
-      width: totalWidth,
+      width: '100%',
       borderBottom: '0.5px solid rgba(255,255,255,0.1)',
     }}>
       {cols.map(col => (
@@ -173,6 +180,7 @@ function TableHeader({
           align={col.align}
           width={col.width}
           density={density}
+          flex={colFlex(col, resizable ?? false)}
           onSort={col.sortable ? () => onSort?.(col.key) : undefined}
           onResizeStart={
             resizable && col.resizable && onResizeStart
@@ -186,13 +194,14 @@ function TableHeader({
 }
 
 function TableDataRow({
-  row, cols, rowState, theme, density,
+  row, cols, rowState, theme, density, resizable,
 }: {
   row: RowData;
   cols: ColDef[];
   rowState: RowState;
   theme: Theme;
   density: Density;
+  resizable?: boolean;
 }) {
   const isEmpty = rowState === 'empty';
   const skeletonWidths = cols.map(c => c.width);
@@ -200,12 +209,13 @@ function TableDataRow({
   return (
     <RowBase state={rowState} theme={theme} density={density} skeletonWidths={skeletonWidths}>
       {cols.map(col => {
-        if (col.key === 'name')     return <CellText    key="name"   value={row.name}   empty={isEmpty} width={col.width} density={density} />;
-        if (col.key === 'value')    return <CellMetric  key="value"  value={row.value}  sentiment={isEmpty ? 'neutral' : row.sentiment} empty={isEmpty || !row.value} width={col.width} density={density} />;
-        if (col.key === 'category') return <CellText    key="cat"    value={row.category} empty={isEmpty} width={col.width} density={density} />;
-        if (col.key === 'status')   return <CellStatus  key="status" display={isEmpty ? 'empty' : row.status} progress={row.progress} density={density} width={col.width} />;
-        if (col.key === 'health')   return <CellHealth  key="health" sentiment={row.health} empty={isEmpty} width={col.width} density={density} />;
-        if (col.key === 'action')   return <CellAction  key="action" action={row.action} width={col.width} density={density} />;
+        const flex = colFlex(col, resizable ?? false);
+        if (col.key === 'name')     return <CellText    key="name"   value={row.name}   empty={isEmpty} width={col.width} density={density} flex={flex} />;
+        if (col.key === 'value')    return <CellMetric  key="value"  value={row.value}  sentiment={isEmpty ? 'neutral' : row.sentiment} empty={isEmpty || !row.value} width={col.width} density={density} flex={flex} />;
+        if (col.key === 'category') return <CellText    key="cat"    value={row.category} empty={isEmpty} width={col.width} density={density} flex={flex} />;
+        if (col.key === 'status')   return <CellStatus  key="status" display={isEmpty ? 'empty' : row.status} progress={row.progress} density={density} width={col.width} flex={flex} />;
+        if (col.key === 'health')   return <CellHealth  key="health" sentiment={row.health} empty={isEmpty} width={col.width} density={density} flex={flex} />;
+        if (col.key === 'action')   return <CellAction  key="action" action={row.action} width={col.width} density={density} flex={flex} />;
         return null;
       })}
     </RowBase>
@@ -368,8 +378,7 @@ export default function App() {
         <div style={{
           background: tableBg, borderRadius: 12,
           border: `1px solid ${T.rowDivider}`,
-          overflow: 'auto', marginBottom: 48,
-          display: 'flex', flexDirection: 'column',
+          overflowX: 'auto', marginBottom: 48,
         }}>
           <TableHeader
             cols={cols}
@@ -389,6 +398,7 @@ export default function App() {
               rowState={rowStates[row.id] ?? 'default'}
               theme={theme}
               density={density}
+              resizable={resizable}
             />
           ))}
           {showEmpty && (
@@ -409,6 +419,7 @@ export default function App() {
                   rowState="empty"
                   theme={theme}
                   density={density}
+                  resizable={resizable}
                 />
               ))}
             </>

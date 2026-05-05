@@ -166,6 +166,14 @@ export function Skeleton({ width, height = 12 }: { width: number; height?: numbe
   );
 }
 
+// ─── Shared size helper ───────────────────────────────────────────────────────
+
+function cellSize(width: number, flex?: string): React.CSSProperties {
+  return flex
+    ? { flex, minWidth: width, boxSizing: 'border-box' }
+    : { width, flexShrink: 0, boxSizing: 'border-box' };
+}
+
 // ─── CellText ─────────────────────────────────────────────────────────────────
 
 export interface CellTextProps {
@@ -174,15 +182,16 @@ export interface CellTextProps {
   empty?: boolean;
   width: number;
   density?: Density;
+  flex?: string;
 }
 
 export function CellText({
-  value = 'Text', align = 'left', empty = false, width, density = 'desktop',
+  value = 'Text', align = 'left', empty = false, width, density = 'desktop', flex,
 }: CellTextProps) {
   const height = density === 'tablet' ? 48 : 58;
   return (
     <div style={{
-      width, height, flexShrink: 0, boxSizing: 'border-box',
+      ...cellSize(width, flex), height,
       display: 'flex', alignItems: 'center',
       justifyContent: align === 'center' ? 'center' : 'flex-start',
       padding: '0 16px',
@@ -206,6 +215,7 @@ export interface CellMetricProps {
   empty?: boolean;
   width: number;
   density?: Density;
+  flex?: string;
 }
 
 const SENTIMENT_COLOR: Record<Sentiment, string> = {
@@ -216,12 +226,12 @@ const SENTIMENT_COLOR: Record<Sentiment, string> = {
 };
 
 export function CellMetric({
-  value = '22.5%', sentiment = 'neutral', empty = false, width, density = 'desktop',
+  value = '22.5%', sentiment = 'neutral', empty = false, width, density = 'desktop', flex,
 }: CellMetricProps) {
   const height = density === 'tablet' ? 48 : 58;
   return (
     <div style={{
-      width, height, flexShrink: 0, boxSizing: 'border-box',
+      ...cellSize(width, flex), height,
       display: 'flex', alignItems: 'center',
       padding: '0 16px',
     }}>
@@ -242,19 +252,19 @@ export interface CellStatusProps {
   progress?: number;
   density?: Density;
   width: number;
+  flex?: string;
 }
 
 export function CellStatus({
-  display = 'empty', progress = 72, density = 'desktop', width,
+  display = 'empty', progress = 72, density = 'desktop', width, flex,
 }: CellStatusProps) {
   const height = density === 'tablet' ? 48 : 58;
   const isMobile = density === 'mobile';
   const percentColor = progress === 0 ? T.danger : T.amber;
-  const trackWidth = width - 32;
 
   return (
     <div style={{
-      width, height, flexShrink: 0, boxSizing: 'border-box',
+      ...cellSize(width, flex), height,
       display: 'flex', alignItems: 'center',
       justifyContent: 'flex-start',
       padding: '0 16px',
@@ -278,12 +288,12 @@ export function CellStatus({
       )}
       {/* in-progress — desktop/tablet: % text + bar */}
       {display === 'in-progress' && !isMobile && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5, width: '100%' }}>
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: percentColor }}>
             {progress}%
           </span>
           <div style={{
-            width: trackWidth, height: 3, borderRadius: 2,
+            width: '100%', height: 3, borderRadius: 2,
             background: T.white10, overflow: 'hidden',
           }}>
             <div style={{
@@ -327,13 +337,14 @@ export interface CellHealthProps {
   empty?: boolean;
   width: number;
   density?: Density;
+  flex?: string;
 }
 
-export function CellHealth({ sentiment = 'good', empty = false, width, density = 'desktop' }: CellHealthProps) {
+export function CellHealth({ sentiment = 'good', empty = false, width, density = 'desktop', flex }: CellHealthProps) {
   const height = density === 'tablet' ? 48 : 58;
   return (
     <div style={{
-      width, height, flexShrink: 0,
+      ...cellSize(width, flex), height,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
       {empty
@@ -351,14 +362,15 @@ export interface CellActionProps {
   width: number;
   density?: Density;
   onClick?: () => void;
+  flex?: string;
 }
 
-export function CellAction({ action = 'download', width, density = 'desktop', onClick }: CellActionProps) {
+export function CellAction({ action = 'download', width, density = 'desktop', onClick, flex }: CellActionProps) {
   const height = density === 'tablet' ? 48 : 58;
   const [hovered, setHovered] = useState(false);
   return (
     <div style={{
-      width, height, flexShrink: 0,
+      ...cellSize(width, flex), height,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
       <button
@@ -391,10 +403,11 @@ export interface HeaderCellProps {
   density?: Density;
   onSort?: () => void;
   onResizeStart?: (e: React.MouseEvent) => void;
+  flex?: string;
 }
 
 export function HeaderCell({
-  label, sort = 'none', align = 'left', width, density = 'desktop', onSort, onResizeStart,
+  label, sort = 'none', align = 'left', width, density = 'desktop', onSort, onResizeStart, flex,
 }: HeaderCellProps) {
   const [hovered, setHovered] = useState(false);
 
@@ -404,8 +417,9 @@ export function HeaderCell({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
+        ...cellSize(width, flex),
         position: 'relative',
-        width, height: 40, flexShrink: 0,
+        height: 40,
         display: 'flex', alignItems: 'center',
         justifyContent: align === 'center' ? 'center' : 'space-between',
         padding: '0 16px',
@@ -413,7 +427,6 @@ export function HeaderCell({
         cursor: onSort ? 'pointer' : 'default',
         transition: 'background 120ms ease',
         userSelect: 'none',
-        boxSizing: 'border-box',
       }}
     >
       {align === 'left' ? (
