@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Tag — Bottom Sheet Comparison</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --page-bg: #212121;
+    --app-bg: #0A0A0F;
+    --sheet-bg: #1C1C1C;
+    --elevated: #252525;
+    --accent: #BB86FC;
+    --accent-dim: rgba(187,134,252,0.12);
+    --accent-dim2: rgba(187,134,252,0.08);
+    --text: rgba(255,255,255,0.88);
+    --text-secondary: rgba(255,255,255,0.6);
+    --text-muted: #9898B0;
+    --divider: rgba(255,255,255,0.07);
+    --divider-strong: rgba(255,255,255,0.1);
+    --checkbox-border: rgba(255,255,255,0.22);
+    --row-hover: rgba(255,255,255,0.04);
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  body {
+    background: var(--page-bg);
+    font-family: var(--font);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    gap: 32px;
+  }
+
+  .page-header {
+    text-align: center;
+  }
+
+  .page-header h1 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.01em;
+    margin-bottom: 6px;
+  }
+
+  .page-header p {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .comparison {
+    display: flex;
+    gap: 48px;
+    align-items: flex-start;
+  }
+
+  .phone-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .phone-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ── Phone mockup ── */
+  .phone {
+    width: 340px;
+    height: 700px;
+    background: #111;
+    border-radius: 54px;
+    position: relative;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.08),
+      0 0 0 2px #0a0a0a,
+      0 30px 80px rgba(0,0,0,0.7),
+      inset 0 0 0 1px rgba(255,255,255,0.06);
+  }
+
+  /* Side buttons */
+  .phone::before {
+    content: '';
+    position: absolute;
+    right: -3px;
+    top: 140px;
+    width: 3px;
+    height: 72px;
+    background: #1a1a1a;
+    border-radius: 0 3px 3px 0;
+    box-shadow: 0 88px 0 #1a1a1a;
+  }
+  .phone::after {
+    content: '';
+    position: absolute;
+    left: -3px;
+    top: 120px;
+    width: 3px;
+    height: 44px;
+    background: #1a1a1a;
+    border-radius: 3px 0 0 3px;
+    box-shadow: 0 60px 0 #1a1a1a, 0 116px 0 #1a1a1a;
+  }
+
+  .phone-screen {
+    position: absolute;
+    inset: 12px;
+    background: var(--app-bg);
+    border-radius: 44px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Notch (current) ── */
+  .notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 126px;
+    height: 30px;
+    background: #111;
+    border-radius: 0 0 20px 20px;
+    z-index: 10;
+  }
+
+  /* ── Dynamic Island (HIG) ── */
+  .dynamic-island {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 108px;
+    height: 30px;
+    background: #000;
+    border-radius: 20px;
+    z-index: 10;
+  }
+
+  /* ── Status bar ── */
+  .status-bar {
+    position: relative;
+    z-index: 5;
+    height: 52px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 24px 8px;
+    flex-shrink: 0;
+  }
+
+  .status-time {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .status-icons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .status-icons svg {
+    fill: var(--text);
+  }
+
+  /* ── App screen content ── */
+  .app-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 20px;
+  }
+
+  .app-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .btn-white {
+    background: #FCFBFB;
+    color: #0A0A0F;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 0 20px;
+    height: 36px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-white:hover { opacity: 0.9; }
+  .btn-white:active { opacity: 0.8; }
+
+  /* ── Sheet overlay ── */
+  .sheet-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0);
+    z-index: 20;
+    pointer-events: none;
+    transition: background 0.3s ease;
+    border-radius: 44px;
+  }
+
+  .sheet-overlay.active {
+    background: rgba(0,0,0,0.5);
+    pointer-events: auto;
+  }
+
+  /* ── Bottom sheet base ── */
+  .bottom-sheet {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--sheet-bg);
+    border-radius: 28px 28px 0 0;
+    z-index: 30;
+    transform: translateY(100%);
+    transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+    height: 360px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .bottom-sheet.open {
+    transform: translateY(0);
+  }
+
+  /* ── CURRENT DESIGN ── */
+
+  #sheet-current {
+    border-radius: 0;
+  }
+
+  .sheet-header-current {
+    display: flex;
+    align-items: center;
+    padding: 20px 20px 12px;
+    flex-shrink: 0;
+  }
+
+  .sheet-close-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-right: 12px;
+    transition: background 0.15s;
+  }
+
+  .sheet-close-btn:hover { background: rgba(255,255,255,0.1); }
+
+  .sheet-close-btn svg { fill: var(--text-secondary); }
+
+  .sheet-title-current {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+
+  /* Search row */
+  .search-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px 12px;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  /* Floating hover tooltip */
+  .tooltip-float {
+    position: absolute;
+    top: calc(100% - 4px);
+    left: 0;
+    right: 0;
+    background: #1C1C1E;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.6;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 100;
+  }
+
+  .tooltip-float.show { opacity: 1; }
+
+  .search-field-wrap {
+    flex: 1;
+    position: relative;
+  }
+
+  .search-field {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--divider-strong);
+    outline: none;
+    font-family: var(--font);
+    font-size: 14px;
+    color: var(--text);
+    padding: 6px 0;
+    caret-color: var(--accent);
+  }
+
+  .search-field::placeholder { color: var(--text-muted); }
+
+  /* iOS Toggle */
+  .ios-toggle {
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .ios-toggle input { display: none; }
+
+  .ios-toggle-track {
+    display: block;
+    width: 44px;
+    height: 26px;
+    background: #3d3d3d;
+    border-radius: 13px;
+    position: relative;
+    transition: background 0.22s;
+  }
+
+  .ios-toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.45);
+  }
+
+  .ios-toggle input:checked ~ .ios-toggle-track { background: var(--accent); }
+  .ios-toggle input:checked ~ .ios-toggle-track::after { transform: translateX(18px); }
+
+  /* Info icon */
+  .info-btn {
+    width: 28px;
+    height: 28px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    transition: background 0.15s;
+    position: relative;
+  }
+
+  .info-btn:hover { background: rgba(255,255,255,0.06); }
+  .info-btn svg { fill: var(--text-muted); }
+
+  /* Conditional Add tag button */
+  .add-tag-btn-sheet {
+    background: rgba(255,255,255,0.08);
+    border: none;
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: default;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.2s, color 0.2s;
+    pointer-events: none;
+  }
+
+  .add-tag-btn-sheet.active {
+    background: var(--accent);
+    color: #0A0A0F;
+    cursor: pointer;
+    pointer-events: auto;
+    font-weight: 600;
+  }
+
+  /* Tooltip strip */
+  .tooltip-strip {
+    margin: 0 16px 10px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    display: none;
+    flex-shrink: 0;
+    border: 1px solid var(--divider);
+  }
+
+  .tooltip-strip.visible { display: block; }
+
+  /* Divider */
+  .sheet-divider {
+    height: 1px;
+    background: var(--divider);
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  /* Tag list */
+  .tag-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 4px 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tag-list::-webkit-scrollbar { width: 0; }
+
+  /* Current — tag row with checkbox */
+  .tag-row-current {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 48px;
+    cursor: pointer;
+    transition: background 0.1s;
+    flex-shrink: 0;
+  }
+
+  .tag-row-current:hover { background: var(--row-hover); }
+
+  .tag-name-current {
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 400;
+  }
+
+  .checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 2px solid rgba(255,255,255,0.75);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .checkbox.checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .checkbox svg { display: none; }
+  .checkbox.checked svg { display: block; }
+
+  /* Toast */
+  .toast {
+    position: absolute;
+    top: 60px;
+    right: 12px;
+    transform: translateY(-12px);
+    background: #FCFBFB;
+    border: 1px solid rgba(12,157,97,0.22);
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #111827;
+    white-space: nowrap;
+    z-index: 50;
+    transition: transform 0.25s cubic-bezier(0.32,0.72,0,1), opacity 0.25s;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* Top toast — slides down from status bar */
+  .top-toast {
+    position: absolute;
+    top: 58px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-70px);
+    background: #FCFBFB;
+    border: 1px solid rgba(12,157,97,0.22);
+    border-radius: 12px;
+    padding: 9px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #111827;
+    white-space: nowrap;
+    z-index: 50;
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s;
+    opacity: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .top-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  /* Selection count — muted subtitle, no color treatment */
+  .sheet-title-area {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+  }
+
+  .selection-count {
+    display: none;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  .selection-count.visible { display: block; }
+
+  /* ── HIG DESIGN ── */
+
+  .sheet-handle-wrap {
+    padding: 12px 0 4px;
+    display: flex;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: grab;
+  }
+
+  .sheet-handle {
+    width: 36px;
+    height: 4px;
+    background: rgba(255,255,255,0.28);
+    border-radius: 99px;
+  }
+
+  .sheet-header-hig {
+    padding: 10px 20px 14px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .sheet-title-hig {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    text-align: left;
+  }
+
+  /* HIG search field — rounded rect */
+  .search-row-hig {
+    padding: 0 16px 12px;
+    flex-shrink: 0;
+  }
+
+  .search-field-hig-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #2C2C2E;
+    border-radius: 12px;
+    border: 1px solid var(--divider);
+    padding: 0 12px;
+    height: 38px;
+    gap: 8px;
+    transition: border-color 0.15s;
+  }
+
+  .search-field-hig-wrap:focus-within {
+    border-color: rgba(187,134,252,0.4);
+  }
+
+  .search-icon { flex-shrink: 0; }
+  .search-icon svg { fill: var(--text-muted); display: block; }
+
+  .search-field-hig {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: var(--font);
+    font-size: 14px;
+    color: var(--text);
+    caret-color: var(--accent);
+    min-width: 0;
+  }
+
+  .search-field-hig::placeholder { color: var(--text-muted); }
+
+  .clear-btn {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+  }
+
+  .clear-btn.visible { display: flex; }
+  .clear-btn svg { fill: #0A0A0F; }
+
+  /* HIG tag list — no box on unselected */
+  .tag-row-hig {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 48px;
+    cursor: pointer;
+    transition: background 0.1s;
+    flex-shrink: 0;
+  }
+
+  .tag-row-hig:hover { background: var(--row-hover); }
+
+  .tag-name-hig {
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 400;
+  }
+
+  .checkmark {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .checkmark.visible { opacity: 1; }
+  .checkmark svg { fill: var(--accent); }
+
+  /* Create row */
+  .create-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 20px;
+    height: 48px;
+    cursor: pointer;
+    transition: background 0.1s;
+    display: none;
+    flex-shrink: 0;
+  }
+
+  .create-row:hover { background: var(--accent-dim2); }
+  .create-row.visible { display: flex; }
+
+  .create-plus {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .create-plus svg { fill: var(--accent); }
+
+  .create-label {
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .create-label span { font-weight: 400; color: var(--text-secondary); }
+
+  /* No results */
+  .no-results {
+    display: none;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .no-results.visible { display: flex; }
+
+  /* Newly created tag flash */
+  @keyframes tagFlash {
+    0%   { background: var(--accent-dim); }
+    100% { background: transparent; }
+  }
+
+  .tag-row-hig.flash-in {
+    animation: tagFlash 0.6s ease-out forwards;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Add Tag — Bottom Sheet</h1>
+  <p>Tap "Add tag" on either phone to open the sheet</p>
+</div>
+
+<div class="comparison">
+
+  <!-- ── LEFT: CURRENT DESIGN ── -->
+  <div class="phone-col">
+    <div class="phone-label">Current Design</div>
+    <div class="phone" id="phone-current">
+      <div class="notch"></div>
+
+      <div class="phone-screen">
+        <!-- Status bar -->
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <!-- Signal -->
+            <svg width="17" height="12" viewBox="0 0 17 12">
+              <rect x="0" y="8" width="3" height="4" rx="0.5" opacity="0.4"/>
+              <rect x="4.5" y="5.5" width="3" height="6.5" rx="0.5" opacity="0.6"/>
+              <rect x="9" y="3" width="3" height="9" rx="0.5" opacity="0.8"/>
+              <rect x="13.5" y="0" width="3" height="12" rx="0.5"/>
+            </svg>
+            <!-- WiFi -->
+            <svg width="16" height="12" viewBox="0 0 16 12">
+              <path d="M8 9.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/>
+              <path d="M8 6c1.5 0 2.9.6 3.9 1.6l1.4-1.4A7.9 7.9 0 0 0 8 4C5.8 4 3.8 4.9 2.3 6.2l1.4 1.4A5.9 5.9 0 0 1 8 6z" opacity="0.7"/>
+              <path d="M8 2c3 0 5.7 1.2 7.7 3.2l1.3-1.4A11.9 11.9 0 0 0 8 0C4.7 0 1.7 1.3-.2 3.5L1 4.8A9.9 9.9 0 0 1 8 2z" opacity="0.4"/>
+            </svg>
+            <!-- Battery -->
+            <svg width="25" height="12" viewBox="0 0 25 12">
+              <rect x="0" y="1" width="21" height="10" rx="2.5" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" fill="none"/>
+              <rect x="22" y="3.5" width="2.5" height="5" rx="1.2" fill="rgba(255,255,255,0.4)"/>
+              <rect x="1.5" y="2.5" width="15" height="7" rx="1.5" fill="rgba(255,255,255,0.88)"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- App content -->
+        <div class="app-content">
+          <p class="app-hint">Item screen</p>
+          <button class="btn-white" onclick="openSheet('current')">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="#0A0A0F">
+              <path d="M7 1a1 1 0 0 1 1 1v4h4a1 1 0 0 1 0 2H8v4a1 1 0 0 1-2 0V8H2a1 1 0 0 1 0-2h4V2a1 1 0 0 1 1-1z"/>
+            </svg>
+            Add tag
+          </button>
+        </div>
+
+        <!-- Sheet overlay -->
+        <div class="sheet-overlay" id="overlay-current" onclick="closeSheet('current')"></div>
+
+        <!-- Bottom sheet -->
+        <div class="bottom-sheet" id="sheet-current">
+
+          <!-- Header -->
+          <div class="sheet-header-current">
+            <button class="sheet-close-btn" onclick="closeSheet('current')">
+              <svg width="10" height="10" viewBox="0 0 10 10">
+                <path d="M1 1l8 8M9 1l-8 8" stroke="rgba(255,255,255,0.6)" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <span class="sheet-title-current">Add tag</span>
+          </div>
+
+          <!-- Search row -->
+          <div class="search-row">
+            <div class="search-field-wrap">
+              <input
+                class="search-field"
+                id="search-current"
+                type="text"
+                placeholder="Search..."
+                oninput="onSearchCurrent(this.value)"
+                autocomplete="off"
+              />
+            </div>
+            <label class="ios-toggle">
+              <input type="checkbox" id="ios-toggle-current" checked onchange="toggleMode()">
+              <span class="ios-toggle-track"></span>
+            </label>
+            <button class="info-btn" id="info-btn-current">
+              <svg width="16" height="16" viewBox="0 0 16 16">
+                <circle cx="8" cy="8" r="7" stroke="rgba(255,255,255,0.4)" stroke-width="1.4" fill="none"/>
+                <rect x="7.2" y="6.8" width="1.6" height="4.8" rx="0.8"/>
+                <circle cx="8" cy="4.8" r="0.9"/>
+              </svg>
+            </button>
+            <button class="add-tag-btn-sheet" id="add-tag-btn-current" onclick="addNewTagCurrent()">Add tag</button>
+          </div>
+
+          <!-- Floating tooltip (hover only) -->
+          <div class="tooltip-float" id="tooltip-float-current"></div>
+
+          <div class="sheet-divider"></div>
+
+          <!-- Tag list -->
+          <div class="tag-list" id="list-current">
+            <!-- populated by JS -->
+          </div>
+
+        </div><!-- /sheet-current -->
+
+        <!-- Toast -->
+        <div class="toast" id="toast-current"></div>
+
+      </div><!-- /phone-screen -->
+    </div><!-- /phone -->
+  </div>
+
+  <!-- ── RIGHT: HIG REDESIGN ── -->
+  <div class="phone-col">
+    <div class="phone-label">HIG Redesign</div>
+    <div class="phone" id="phone-hig">
+      <div class="dynamic-island"></div>
+
+      <div class="phone-screen">
+        <!-- Status bar -->
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <svg width="17" height="12" viewBox="0 0 17 12">
+              <rect x="0" y="8" width="3" height="4" rx="0.5" opacity="0.4"/>
+              <rect x="4.5" y="5.5" width="3" height="6.5" rx="0.5" opacity="0.6"/>
+              <rect x="9" y="3" width="3" height="9" rx="0.5" opacity="0.8"/>
+              <rect x="13.5" y="0" width="3" height="12" rx="0.5"/>
+            </svg>
+            <svg width="16" height="12" viewBox="0 0 16 12">
+              <path d="M8 9.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/>
+              <path d="M8 6c1.5 0 2.9.6 3.9 1.6l1.4-1.4A7.9 7.9 0 0 0 8 4C5.8 4 3.8 4.9 2.3 6.2l1.4 1.4A5.9 5.9 0 0 1 8 6z" opacity="0.7"/>
+              <path d="M8 2c3 0 5.7 1.2 7.7 3.2l1.3-1.4A11.9 11.9 0 0 0 8 0C4.7 0 1.7 1.3-.2 3.5L1 4.8A9.9 9.9 0 0 1 8 2z" opacity="0.4"/>
+            </svg>
+            <svg width="25" height="12" viewBox="0 0 25 12">
+              <rect x="0" y="1" width="21" height="10" rx="2.5" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" fill="none"/>
+              <rect x="22" y="3.5" width="2.5" height="5" rx="1.2" fill="rgba(255,255,255,0.4)"/>
+              <rect x="1.5" y="2.5" width="15" height="7" rx="1.5" fill="rgba(255,255,255,0.88)"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- App content -->
+        <div class="app-content">
+          <p class="app-hint">Item screen</p>
+          <button class="btn-white" onclick="openSheet('hig')">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="#0A0A0F">
+              <path d="M7 1a1 1 0 0 1 1 1v4h4a1 1 0 0 1 0 2H8v4a1 1 0 0 1-2 0V8H2a1 1 0 0 1 0-2h4V2a1 1 0 0 1 1-1z"/>
+            </svg>
+            Add tag
+          </button>
+        </div>
+
+        <!-- Sheet overlay -->
+        <div class="sheet-overlay" id="overlay-hig" onclick="closeSheet('hig')"></div>
+
+        <!-- Bottom sheet -->
+        <div class="bottom-sheet" id="sheet-hig">
+
+          <!-- Handle -->
+          <div class="sheet-handle-wrap" onclick="closeSheet('hig')">
+            <div class="sheet-handle"></div>
+          </div>
+
+          <!-- Header -->
+          <div class="sheet-header-hig">
+            <div class="sheet-title-area">
+              <span class="sheet-title-hig">Tags</span>
+              <span class="selection-count" id="count-hig"></span>
+            </div>
+          </div>
+
+          <!-- Search row -->
+          <div class="search-row-hig">
+            <div class="search-field-hig-wrap">
+              <span class="search-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14">
+                  <path d="M9.5 9.5l3 3M6 11A5 5 0 1 1 6 1a5 5 0 0 1 0 10z" stroke="#9898B0" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                </svg>
+              </span>
+              <input
+                class="search-field-hig"
+                id="search-hig"
+                type="text"
+                placeholder="Search or create a tag"
+                oninput="onSearchHig(this.value)"
+                autocomplete="off"
+              />
+              <button class="clear-btn" id="clear-btn-hig" onclick="clearSearchHig()">
+                <svg width="8" height="8" viewBox="0 0 8 8">
+                  <path d="M1 1l6 6M7 1l-6 6" stroke="#0A0A0F" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="sheet-divider"></div>
+
+          <!-- Create row (appears when typing) -->
+          <div class="create-row" id="create-row-hig" onclick="createTagHig()">
+            <div class="create-plus">
+              <svg width="8" height="8" viewBox="0 0 8 8">
+                <path d="M4 1v6M1 4h6" stroke="#BB86FC" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <span class="create-label">Create <span id="create-label-text">"..."</span></span>
+          </div>
+
+          <div class="sheet-divider" id="create-divider-hig" style="display:none"></div>
+
+          <!-- Tag list -->
+          <div class="tag-list" id="list-hig">
+            <!-- populated by JS -->
+          </div>
+
+        </div><!-- /sheet-hig -->
+
+        <!-- Top toast -->
+        <div class="top-toast" id="top-toast-hig"></div>
+
+      </div><!-- /phone-screen -->
+    </div><!-- /phone -->
+  </div>
+
+</div><!-- /comparison -->
+
+<script>
+  const TAGS = ['Bar chow', 'Cocktail', 'Lunch Menu', 'Summer Cocktail Specials', 'Summer special'];
+
+  // ── State ──
+  const state = {
+    current: { selectedTags: new Set(), extraTags: [], mode: 'smart', tooltipOpen: false },
+    hig:     { selectedTags: new Set(), extraTags: [] }
+  };
+
+  // ── Shared helpers ──
+  function sortedTagList(allTags, selectedSet) {
+    const selected   = allTags.filter(t =>  selectedSet.has(t)).sort((a,b) => a.localeCompare(b));
+    const unselected = allTags.filter(t => !selectedSet.has(t)).sort((a,b) => a.localeCompare(b));
+    return { selected, unselected };
+  }
+
+  function updateCountBadge(id, count) {
+    const el = document.getElementById(`count-${id}`);
+    if (count > 0) {
+      el.textContent = `${count} selected`;
+      el.classList.add('visible');
+    } else {
+      el.classList.remove('visible');
+    }
+  }
+
+  let topToastTimers = {};
+  function showTopToast(id, msg, type = 'add') {
+    const toast = document.getElementById(`top-toast-${id}`);
+    const isRemove = type === 'remove';
+    toast.style.borderColor = isRemove ? 'rgba(255,255,255,0.1)' : 'rgba(12,157,97,0.22)';
+    toast.innerHTML = isRemove
+      ? `<svg width="14" height="14" viewBox="0 0 14 14">
+           <circle cx="7" cy="7" r="6" fill="rgba(255,255,255,0.08)"/>
+           <path d="M4.5 4.5l5 5M9.5 4.5l-5 5" stroke="rgba(0,0,0,0.4)" stroke-width="1.6" stroke-linecap="round"/>
+         </svg>
+         <span>${msg}</span>`
+      : `<svg width="14" height="14" viewBox="0 0 14 14">
+           <circle cx="7" cy="7" r="6" fill="rgba(71,184,129,0.2)"/>
+           <path d="M4.5 7l2 2 3.5-3.5" stroke="#47B881" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+         </svg>
+         <span>${msg}</span>`;
+    toast.classList.add('show');
+    clearTimeout(topToastTimers[id]);
+    topToastTimers[id] = setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+  // ── Sheet open/close ──
+  function openSheet(id) {
+    document.getElementById(`sheet-${id}`).classList.add('open');
+    document.getElementById(`overlay-${id}`).classList.add('active');
+    if (id === 'current') {
+      document.getElementById('search-current').value = '';
+      updateAddTagBtn('');
+      renderCurrentList('');
+    } else {
+      document.getElementById('search-hig').value = '';
+      document.getElementById('clear-btn-hig').classList.remove('visible');
+      renderHigList('');
+      hideCreateRow();
+    }
+  }
+
+  function closeSheet(id) {
+    document.getElementById(`sheet-${id}`).classList.remove('open');
+    document.getElementById(`overlay-${id}`).classList.remove('active');
+  }
+
+  // ── CURRENT: search + button activation ──
+  function onSearchCurrent(val) {
+    updateAddTagBtn(val);
+    renderCurrentList(val);
+  }
+
+  function updateAddTagBtn(val) {
+    const btn = document.getElementById('add-tag-btn-current');
+    if (val.trim().length > 0) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  }
+
+  function renderCurrentList(query) {
+    const list = document.getElementById('list-current');
+    const all = [...TAGS, ...state.current.extraTags];
+    const filtered = query.trim()
+      ? all.filter(t => t.toLowerCase().includes(query.toLowerCase()))
+      : all;
+
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="no-results visible">No matching tags</div>';
+      return;
+    }
+
+    list.innerHTML = filtered.map(tag => {
+      const checked = state.current.selectedTags.has(tag);
+      return `
+        <div class="tag-row-current" onclick="toggleCurrentTag('${tag.replace(/'/g, "\\'")}')">
+          <span class="tag-name-current">${tag}</span>
+          <div class="checkbox ${checked ? 'checked' : ''}">
+            <svg width="10" height="8" viewBox="0 0 10 8">
+              <path d="M1 4l3 3 5-6" stroke="#0A0A0F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function toggleCurrentTag(tag) {
+    if (state.current.selectedTags.has(tag)) {
+      state.current.selectedTags.delete(tag);
+    } else {
+      state.current.selectedTags.add(tag);
+      showToast('current', `"${tag}" tag added`);
+    }
+    renderCurrentList(document.getElementById('search-current').value);
+  }
+
+  function addNewTagCurrent() {
+    const val = document.getElementById('search-current').value.trim();
+    if (!val) return;
+    if (!TAGS.includes(val) && !state.current.extraTags.includes(val)) {
+      state.current.extraTags.push(val);
+    }
+    state.current.selectedTags.add(val);
+    showToast('current', `"${val}" tag added`);
+    document.getElementById('search-current').value = '';
+    updateAddTagBtn('');
+    renderCurrentList('');
+  }
+
+  // ── CURRENT: mode toggle ──
+  function toggleMode() {
+    const isSmartMode = document.getElementById('ios-toggle-current').checked;
+    state.current.mode = isSmartMode ? 'smart' : 'exact';
+    updateTooltipFloatText();
+  }
+
+  function updateTooltipFloatText() {
+    const tip = document.getElementById('tooltip-float-current');
+    tip.textContent = state.current.mode === 'smart'
+      ? 'Helps with typos and similar words. Example: Searching for "tee" might show results like "tea" or "green tea." Recommended in most cases.'
+      : 'Displays only results that contain your exact search term. Example: Searching for "tee" will only show "tee." Useful for narrowing down results precisely.';
+  }
+
+  // ── CURRENT: hover tooltip (toggle + info icon) ──
+  (function wireCurrentTooltip() {
+    const tip = document.getElementById('tooltip-float-current');
+    const toggleLabel = document.querySelector('#sheet-current .ios-toggle');
+    const infoBtn = document.getElementById('info-btn-current');
+    let hoverCount = 0;
+
+    function showTip() {
+      updateTooltipFloatText();
+      hoverCount++;
+      tip.classList.add('show');
+    }
+    function hideTip() {
+      hoverCount = Math.max(0, hoverCount - 1);
+      if (hoverCount === 0) tip.classList.remove('show');
+    }
+
+    [toggleLabel, infoBtn].forEach(el => {
+      el.addEventListener('mouseenter', showTip);
+      el.addEventListener('mouseleave', hideTip);
+    });
+  })();
+
+  // ── CURRENT: toast ──
+  let toastTimer = null;
+  function showToast(id, msg) {
+    const toast = document.getElementById(`toast-${id}`);
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  // ── HIG: search ──
+  function onSearchHig(val) {
+    const clearBtn = document.getElementById('clear-btn-hig');
+    clearBtn.classList.toggle('visible', val.length > 0);
+
+    if (val.trim().length > 0) {
+      showCreateRow(val);
+    } else {
+      hideCreateRow();
+    }
+    renderHigList(val);
+  }
+
+  function clearSearchHig() {
+    const input = document.getElementById('search-hig');
+    input.value = '';
+    input.focus();
+    onSearchHig('');
+  }
+
+  function showCreateRow(val) {
+    const row = document.getElementById('create-row-hig');
+    const divider = document.getElementById('create-divider-hig');
+    const label = document.getElementById('create-label-text');
+    row.classList.add('visible');
+    divider.style.display = 'block';
+    label.textContent = `"${val}"`;
+  }
+
+  function hideCreateRow() {
+    document.getElementById('create-row-hig').classList.remove('visible');
+    document.getElementById('create-divider-hig').style.display = 'none';
+  }
+
+  function renderHigList(query) {
+    const allTags = [...TAGS, ...state.hig.extraTags];
+    const filtered = query.trim()
+      ? allTags.filter(t => t.toLowerCase().includes(query.toLowerCase()))
+      : allTags;
+
+    const list = document.getElementById('list-hig');
+
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="no-results visible">No matching tags</div>';
+      updateCountBadge('hig', state.hig.selectedTags.size);
+      return;
+    }
+
+    const { selected, unselected } = sortedTagList(filtered, state.hig.selectedTags);
+
+    const rowHtml = (tag, checked) => {
+      const safeTag = tag.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      return `
+        <div class="tag-row-hig" onclick="toggleHigTag('${safeTag}')">
+          <span class="tag-name-hig">${tag}</span>
+          <div class="checkmark ${checked ? 'visible' : ''}">
+            <svg width="14" height="11" viewBox="0 0 14 11">
+              <path d="M1.5 5.5l4 4 7-8" stroke="#BB86FC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+          </div>
+        </div>`;
+    };
+
+    let html = selected.map(t => rowHtml(t, true)).join('');
+    html += unselected.map(t => rowHtml(t, false)).join('');
+
+    list.innerHTML = html;
+    updateCountBadge('hig', state.hig.selectedTags.size);
+  }
+
+  function toggleHigTag(tag) {
+    if (state.hig.selectedTags.has(tag)) {
+      state.hig.selectedTags.delete(tag);
+      showTopToast('hig', `"${tag}" tag removed`, 'remove');
+    } else {
+      state.hig.selectedTags.add(tag);
+      showTopToast('hig', `"${tag}" tag added`, 'add');
+    }
+    renderHigList(document.getElementById('search-hig').value);
+  }
+
+  function createTagHig() {
+    const val = document.getElementById('search-hig').value.trim();
+    if (!val) return;
+
+    if (!TAGS.includes(val) && !state.hig.extraTags.includes(val)) {
+      state.hig.extraTags.push(val);
+    }
+    state.hig.selectedTags.add(val);
+
+    document.getElementById('search-hig').value = '';
+    document.getElementById('clear-btn-hig').classList.remove('visible');
+    hideCreateRow();
+    renderHigList('');
+    showTopToast('hig', `"${val}" created`);
+  }
+
+  // ── Init ──
+  renderCurrentList('');
+  renderHigList('');
+</script>
+</body>
+</html>
