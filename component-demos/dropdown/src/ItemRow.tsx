@@ -52,6 +52,19 @@ const CheckboxIcon: React.FC<{ checked: boolean; disabled?: boolean }> = ({ chec
   );
 };
 
+// Date period selected state: checkmark only, no box (matches Figma "selected-no fill")
+const CheckmarkOnly: React.FC = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
+    <path
+      d="M7.5 10.625L9.375 12.5L12.5 8.125"
+      stroke="#BB86FC"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const ItemRow: React.FC<ItemRowProps> = ({
@@ -129,7 +142,11 @@ export const ItemRow: React.FC<ItemRowProps> = ({
         <span style={{ color: '#9898B0', fontSize: 12, flexShrink: 0 }}>{count}</span>
       )}
 
-      {checkbox === 'trailing' && <CheckboxIcon checked={isSelected} disabled={isDisabled} />}
+      {checkbox === 'trailing' && (
+        type === 'Date period'
+          ? (isSelected ? <CheckmarkOnly /> : null)
+          : <CheckboxIcon checked={isSelected} disabled={isDisabled} />
+      )}
     </div>
   );
 };
