@@ -1014,11 +1014,7 @@
     const isRemove = type === 'remove';
     toast.style.borderColor = isRemove ? 'rgba(255,255,255,0.1)' : 'rgba(12,157,97,0.22)';
     toast.innerHTML = isRemove
-      ? `<svg width="14" height="14" viewBox="0 0 14 14">
-           <circle cx="7" cy="7" r="6" fill="rgba(255,255,255,0.08)"/>
-           <path d="M4.5 4.5l5 5M9.5 4.5l-5 5" stroke="rgba(0,0,0,0.4)" stroke-width="1.6" stroke-linecap="round"/>
-         </svg>
-         <span>${msg}</span>`
+      ? `<span>${msg}</span>`
       : `<svg width="14" height="14" viewBox="0 0 14 14">
            <circle cx="7" cy="7" r="6" fill="rgba(71,184,129,0.2)"/>
            <path d="M4.5 7l2 2 3.5-3.5" stroke="#47B881" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
